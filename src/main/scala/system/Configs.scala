@@ -50,7 +50,7 @@ class DualChannelDualBankConfig extends Config(
   new WithNBanks(4) ++ new DefaultConfig
 )
 
-class RoccExampleConfig extends Config(new WithRoccExample ++ new DefaultConfig)
+// class RoccExampleConfig extends Config(new WithRoccExample ++ new DefaultConfig)
 
 class HeterogeneousTileExampleConfig extends Config(
   new WithNBigCores(n = 1) ++
@@ -59,6 +59,28 @@ class HeterogeneousTileExampleConfig extends Config(
   new WithCoherentBusTopology ++
   new BaseConfig
 )
+
+/* SAVVINA added from MetaSys*/
+class AreaBaseline extends Config(new WithSimNMediumCores(1) ++ new BaseConfig)
+// class AreaMetaSys extends Config(new BuffedALUConfig(128,9,false) ++ new AreaBaseline)
+
+class DefaultMediumConfig extends Config(new WithSimNMediumCores(1) ++ new BaseConfig)
+class ModifiedMediumConfig extends Config(new WithSimNMediumCores(4) ++ new BaseConfig)
+// class RoccMediumExampleConfig extends Config(new ALUConfig(32,true,false,20) ++ new WithoutFPU ++ new DefaultMediumConfig)
+// class RoccAtomPrefetcherConfig extends Config(new PrefetcherConfig(32,20) ++ new WithoutFPU ++ new DefaultMediumConfig)
+// class RoccStridePrefetcherConfig extends Config(new StridePrefetcherConfig(32,20) ++ new WithoutFPU ++ new DefaultMediumConfig)
+// class RoccIndirectPrefetcherConfig extends Config(new IndirectPrefetcherConfig(32,20)++ new WithoutFPU ++ new DefaultMediumConfig)
+// class RoccIndirectPrefetcherBFSConfig extends Config(new IndirectPrefetcherBFSConfig(32,20)++ new WithoutFPU ++ new DefaultMediumConfig)
+// class RoccIndirectPrefetcherStreamOnlyConfig extends Config(new IndirectPrefetcherStreamOnlyConfig(32,20)++ new WithoutFPU ++ new DefaultMediumConfig)
+// class RoccAtomControllerConfig extends Config(new AtomControllerConfig(32, 20,false) ++ new WithoutFPU ++ new DefaultMediumConfig)
+// class RoccMediumBuffedExampleConfig extends Config(new BuffedALUConfig(32,20,false) ++ new WithoutFPU ++ new DefaultMediumConfig)
+// class TestRoccMediumBuffedPhysicalExampleConfig extends Config(new BuffedALUConfig(32,9,true) ++ new WithoutFPU ++ new DefaultMediumConfig)
+// class RoccDualConfig extends Config(new BuffedPartitionedALUDualConfig(16,16,20,false) ++ new WithoutFPU ++ new DefaultMediumConfig)
+// class RoccMediumBuffedPhysicalExampleConfig extends Config(new BuffedALUConfig(32,20,true) ++ new WithoutFPU ++ new DefaultMediumConfig)
+// class RoccMediumBuffedDualExampleConfig extends Config(new BuffedALUDualConfig(32,20,false) ++ new WithoutFPU ++ new DefaultMediumConfig)
+// class RoccMoreCoresConfig extends Config(new ALUConfig(32,true,false,9) ++ new WithoutFPU ++ new ModifiedMediumConfig)
+
+// class RoccSmallExampleConfig extends Config(new ALUConfig(32,true,false,9) ++ new WithoutFPU ++ new DefaultSmallConfig)
 
 class Edge128BitConfig extends Config(
   new WithEdgeDataBits(128) ++ new DefaultConfig

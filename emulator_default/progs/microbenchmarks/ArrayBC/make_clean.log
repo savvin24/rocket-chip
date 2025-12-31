@@ -1,0 +1,3 @@
+make: Entering directory '/home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/microbenchmarks/ArrayBC'
+rm -f *.o stream-pk_noatom.riscv stream-pk.riscv *~
+make: Leaving directory '/home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/microbenchmarks/ArrayBC'

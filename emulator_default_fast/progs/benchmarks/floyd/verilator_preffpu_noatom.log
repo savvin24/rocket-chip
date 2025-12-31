@@ -1,0 +1,15 @@
+bbl loader
+In ATOM_INIT: Loaded AMU table
+cycles: 469062354
+instructions: 257439921
+accelerator misses: 0
+total misses: 0
+alb requests: 0
+alb hits: 0
+dtlb misses: 0
+alb misses: 0
+n/a: 0
+n/a: 0
+469062354,257439921,0,0,0,0,0,0,0,0
+[UART] UART0 is here (stdin/stdout).
+

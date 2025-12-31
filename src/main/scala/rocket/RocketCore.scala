@@ -15,8 +15,8 @@ import scala.collection.mutable.ArrayBuffer
 case class RocketCoreParams(
   bootFreqHz: BigInt = 0,
   useVM: Boolean = true,
-  useUser: Boolean = false,
-  useSupervisor: Boolean = false,
+  useUser: Boolean = true, //SAVVINA change false -> true
+  useSupervisor: Boolean = true, //SAVVINA change false -> true
   useHypervisor: Boolean = false,
   useDebug: Boolean = true,
   useAtomics: Boolean = true,
@@ -42,7 +42,7 @@ case class RocketCoreParams(
   mtvecWritable: Boolean = true,
   fastLoadWord: Boolean = true,
   fastLoadByte: Boolean = false,
-  branchPredictionModeCSR: Boolean = false,
+  branchPredictionModeCSR: Boolean = false, //SAVVINA change false -> true
   clockGate: Boolean = false,
   mvendorid: Int = 0, // 0 means non-commercial implementation
   mimpid: Int = 0x20181004, // release date in BCD
@@ -181,6 +181,10 @@ class Rocket(tile: RocketTile)(implicit p: Parameters) extends CoreModule()(p)
     new EventSet((mask, hits) => (mask & hits).orR, Seq(
       ("load-use interlock", () => id_ex_hazard && ex_ctrl.mem || id_mem_hazard && mem_ctrl.mem || id_wb_hazard && wb_ctrl.mem),
       ("long-latency interlock", () => id_sboard_hazard),
+      // //("csr interlock", () => replay_wb), //id_ex_hazard && ex_ctrl.csr =/= CSR.N || id_mem_hazard && mem_ctrl.csr =/= CSR.N || id_wb_hazard && wb_ctrl.csr =/= CSR.N), // SAVVINA changed from MetaSys
+      // //("I$ blocked", () => ctrl_stalld), //icache_blocked), // SAVVINA changed from MetaSys
+      // ("csr interlock", () => id_ex_hazard && ex_ctrl.csr =/= CSR.N || id_mem_hazard && mem_ctrl.csr =/= CSR.N || id_wb_hazard && wb_ctrl.csr =/= CSR.N), // SAVVINA changed from MetaSys
+      // ("I$ blocked", () => icache_blocked), // SAVVINA changed from MetaSys
       ("csr interlock", () => id_ex_hazard && ex_ctrl.csr =/= CSR.N || id_mem_hazard && mem_ctrl.csr =/= CSR.N || id_wb_hazard && wb_ctrl.csr =/= CSR.N),
       ("I$ blocked", () => icache_blocked),
       ("D$ blocked", () => id_ctrl.mem && dcache_blocked),
@@ -199,6 +203,15 @@ class Rocket(tile: RocketTile)(implicit p: Parameters) extends CoreModule()(p)
       ("ITLB miss", () => io.imem.perf.tlbMiss),
       ("DTLB miss", () => io.dmem.perf.tlbMiss),
       ("L2 TLB miss", () => io.ptw.perf.l2miss)))))
+    //   ("L2 TLB miss", () => io.ptw.perf.l2miss))),
+    // new EventSet((mask, hits) => (mask & hits).orR, Seq(
+    //   //SAVVINA METASYS start
+    //   // ("D$ miss - better", () => io.dmem.perf.access),
+    //   ("DBG1", () => io.rocc.core_snoop.dbg1),//io.dmem.req.fire()),//
+    //   ("DBG2", () => io.rocc.core_snoop.dbg2),//dcache_kill_mem),//
+    //   ("DBG3", () => io.rocc.core_snoop.dbg3),
+    //   ("Total requests", () => io.rocc.core_snoop.dbg4)))))
+    //   //SAVVINA METASYS end
 
   val pipelinedMul = usingMulDiv && mulDivParams.mulUnroll == xLen
   val decode_table = {
@@ -512,6 +525,7 @@ class Rocket(tile: RocketTile)(implicit p: Parameters) extends CoreModule()(p)
   val ex_pc_valid = ex_reg_valid || ex_reg_replay || ex_reg_xcpt_interrupt
   val wb_dcache_miss = wb_ctrl.mem && !io.dmem.resp.valid
   val replay_ex_structural = ex_ctrl.mem && !io.dmem.req.ready ||
+                             ex_ctrl.mem && io.rocc.core_snoop.bp_q_full || // SAVVINA METASYS replay when we have a mem. inst. and lookup q. is full
                              ex_ctrl.div && !div.io.req.ready
   val replay_ex_load_use = wb_dcache_miss && ex_reg_load_use
   val replay_ex = ex_reg_replay || (ex_reg_valid && (replay_ex_structural || replay_ex_load_use))
@@ -696,6 +710,12 @@ class Rocket(tile: RocketTile)(implicit p: Parameters) extends CoreModule()(p)
   // Dont care mem since not all RoCC need accessing memory
   io.rocc.mem := DontCare
 
+  // SAVVINA METASYS start (savvina addition)
+  io.rocc.mem_pref := DontCare
+  io.rocc.mem_amulookup := DontCare
+  //io.rocc.ptw_snoop := ptw.io.snoop
+  // SAVVINA METASYS end (savvina addition)
+
   when (dmem_resp_replay && dmem_resp_xpu) {
     div.io.resp.ready := false.B
     if (usingRoCC)
@@ -714,6 +734,15 @@ class Rocket(tile: RocketTile)(implicit p: Parameters) extends CoreModule()(p)
                  Mux(wb_ctrl.mul, mul.map(_.io.resp.bits.data).getOrElse(wb_reg_wdata),
                  wb_reg_wdata))))
   when (rf_wen) { rf.write(rf_waddr, rf_wdata) }
+
+  // TODO trigger a counter on ex stage
+  // 6 (?) possibilities: 
+  // 1 - D$ responds in two cycles
+  // 2 - D$ miss, will writeback long latency (ll)
+  // 3 - cpu kills the request
+  // 4 - cache nacks the request
+  // 5 - cache requests replay
+  // 6 - wb xcpt in two cycles
 
   // hook up control/status regfile
   csr.io.ungated_clock := clock
@@ -761,6 +790,14 @@ class Rocket(tile: RocketTile)(implicit p: Parameters) extends CoreModule()(p)
   io.rocc.csrs <> csr.io.roccCSRs
   io.trace.time := csr.io.time
   io.trace.insns := csr.io.trace
+
+
+// SAVVINA added from MetaSys
+  when(csr.io.rw.cmd =/= CSR.N)
+  {
+    printf("CSR cmd: 0x%x addr: 0x%x rdata: 0x%x\n", csr.io.rw.cmd, csr.io.rw.addr, csr.io.rw.rdata)
+  }
+
   if (rocketParams.debugROB) {
     val csr_trace_with_wdata = WireInit(csr.io.trace(0))
     csr_trace_with_wdata.wdata.get := rf_wdata
@@ -842,11 +879,14 @@ class Rocket(tile: RocketTile)(implicit p: Parameters) extends CoreModule()(p)
   val rocc_blocked = Reg(Bool())
   rocc_blocked := !wb_xcpt && !io.rocc.cmd.ready && (io.rocc.cmd.valid || rocc_blocked)
 
-  val ctrl_stalld =
+
+  val ctrl_stalld = Wire(Bool()) // SAVVINA changed from MetaSys
+  ctrl_stalld :=
     id_ex_hazard || id_mem_hazard || id_wb_hazard || id_sboard_hazard ||
     csr.io.singleStep && (ex_reg_valid || mem_reg_valid || wb_reg_valid) ||
     id_csr_en && csr.io.decode(0).fp_csr && !io.fpu.fcsr_rdy ||
     id_ctrl.fp && id_stall_fpu ||
+    id_ctrl.mem && io.rocc.core_snoop.bp_q_full || // SAVVINA METASYS reduce activity when lookup q fills up
     id_ctrl.mem && dcache_blocked || // reduce activity during D$ misses
     id_ctrl.rocc && rocc_blocked || // reduce activity while RoCC is busy
     id_ctrl.div && (!(div.io.req.ready || (div.io.resp.valid && !wb_wxd)) || div.io.req.valid) || // reduce odds of replay
@@ -930,6 +970,7 @@ class Rocket(tile: RocketTile)(implicit p: Parameters) extends CoreModule()(p)
   io.dmem.req.bits.no_xcpt := DontCare
   io.dmem.req.bits.data := DontCare
   io.dmem.req.bits.mask := DontCare
+  // io.dmem.req.bits.isLookup := false.B // SAVVINA added from MetaSys
 
   io.dmem.s1_data.data := (if (fLen == 0) mem_reg_rs2 else Mux(mem_ctrl.fp, Fill((xLen max fLen) / fLen, io.fpu.store_data), mem_reg_rs2))
   io.dmem.s1_data.mask := DontCare
@@ -939,12 +980,61 @@ class Rocket(tile: RocketTile)(implicit p: Parameters) extends CoreModule()(p)
   // don't let D$ go to sleep if we're probably going to use it soon
   io.dmem.keep_clock_enabled := ibuf.io.inst(0).valid && id_ctrl.mem && !csr.io.csr_stall
 
+  // io.dmem.req.bits.paddr <> DontCare //SAVVINA, not in original metasys
+  // io.dmem.s1_data.paddr <> DontCare //SAVVINA, not in original metasys
+
+  /* SAVVINA added from MetaSys */
+
+  when(io.dmem.req.valid)
+  {
+    when(ex_ctrl.mem_cmd === 0.U || ex_ctrl.mem_cmd === 1.U)
+    {
+     // printf("---CORE Access---\n")
+     // printf("MEMREQ  --- V: %d R: %d ADR: 0x%x CMD: %d TYP: %d\n",
+     //       io.dmem.req.valid, io.dmem.req.ready, io.dmem.req.bits.addr, io.dmem.req.bits.cmd, io.dmem.req.bits.typ)
+     // printf("--------------\n")
+    }
+  }
+
+  io.rocc.core_snoop.valid      := ex_reg_valid && ex_ctrl.mem && io.dmem.req.ready
+  io.rocc.core_snoop.addr       := encodeVirtualAddress(ex_rs(0), alu.io.adder_out)
+  io.rocc.core_snoop.cmd        := ex_ctrl.mem_cmd
+  io.rocc.core_snoop.size        := ex_reg_mem_size //SAVVINA: not the same in original metasys, I changed it
+  io.rocc.core_snoop.s1_kill    := killm_common || mem_ldst_xcpt
+  //io.rocc.core_snoop.s1_paddr   := io.dmem.resp.bits.paddr
+  io.rocc.core_snoop.s2_paddr   := io.dmem.s2_paddr
+  io.rocc.core_snoop.s2_xcpt    := io.dmem.s2_xcpt
+  io.rocc.core_snoop.s2_nack    := io.dmem.s2_nack
+  io.rocc.core_snoop.miss       := wb_dcache_miss
+  io.rocc.core_snoop.physical   := false.B
+
+  /* SAVVINA added from MetaSys */
+
+  /* SAVVINA added because "not fully initialised error" (didn't exist in MetaSys) */
+
+  io.rocc.ptw_snoop.valid      := DontCare
+  io.rocc.ptw_snoop.addr       := DontCare
+  io.rocc.ptw_snoop.cmd        := DontCare
+  io.rocc.ptw_snoop.size       := DontCare
+  io.rocc.ptw_snoop.s2_paddr   := DontCare
+  io.rocc.ptw_snoop.s1_kill    := DontCare
+  io.rocc.ptw_snoop.s2_xcpt    := DontCare
+  io.rocc.ptw_snoop.s2_nack    := DontCare
+  io.rocc.ptw_snoop.miss       := DontCare
+  io.rocc.ptw_snoop.physical   := DontCare
+
   io.rocc.cmd.valid := wb_reg_valid && wb_ctrl.rocc && !replay_wb_common
   io.rocc.exception := wb_xcpt && csr.io.status.xs.orR
   io.rocc.cmd.bits.status := csr.io.status
   io.rocc.cmd.bits.inst := wb_reg_inst.asTypeOf(new RoCCInstruction())
   io.rocc.cmd.bits.rs1 := wb_reg_wdata
   io.rocc.cmd.bits.rs2 := wb_reg_rs2
+
+  /* SAVVINA added from MetaSys */
+  // val mshr_busy_ctr = RegInit(0.U(64.W))
+  // mshr_busy_ctr := mshr_busy_ctr + PopCount(VecInit(io.dmem.perf.mshr_busy.asBools))
+  // //printf("mshr_busy_ctr: %d\n", mshr_busy_ctr)
+  /* SAVVINA added from MetaSys */
 
   // gate the clock
   val unpause = csr.io.time(rocketParams.lgPauseCycles-1, 0) === 0.U || csr.io.inhibit_cycle || io.dmem.perf.release || take_pc
@@ -968,6 +1058,8 @@ class Rocket(tile: RocketTile)(implicit p: Parameters) extends CoreModule()(p)
   // evaluate performance counters
   val icache_blocked = !(io.imem.resp.valid || RegNext(io.imem.resp.valid))
   csr.io.counters foreach { c => c.inc := RegNext(perfEvents.evaluate(c.eventSel)) }
+
+  //csr.io.counters(6).inc := RegNext(PopCount(VecInit(io.dmem.perf.mshr_busy.asBools))) // SAVVINA added from MetaSys
 
   val coreMonitorBundle = Wire(new CoreMonitorBundle(xLen, fLen))
 

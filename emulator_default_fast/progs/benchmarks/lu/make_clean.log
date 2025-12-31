@@ -1,0 +1,3 @@
+make: Entering directory '/home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/benchmarks/lu'
+rm -f *.o lu.pluto_noatom.riscv lu.pluto.riscv *~
+make: Leaving directory '/home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/benchmarks/lu'

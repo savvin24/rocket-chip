@@ -1,0 +1,3 @@
+make: Entering directory '/home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/benchmarks/dsyr2k'
+rm -f *.o dsyr2k_noatom.riscv dsyr2k.riscv *~
+make: Leaving directory '/home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/benchmarks/dsyr2k'

@@ -1,0 +1,8 @@
+make: Entering directory '/home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/benchmarks/dsyr2k'
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O3 -Wall -DNOATOM -I../../util  -I../../XMemLib -c dsyr2k.cpp -o dsyr2k_noatom.o
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O3 -Wall -DNOATOM -I../../util  -I../../XMemLib -c ../../util/HPC.cpp -o hpc_noatom.o
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O3 -Wall -DNOATOM -I../../util  -I../../XMemLib dsyr2k_noatom.o hpc_noatom.o -L../../XMemLib -lXMemLib -o dsyr2k_noatom.riscv
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O3 -Wall  -I../../util  -I../../XMemLib -c dsyr2k.cpp -o dsyr2k.o
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O3 -Wall  -I../../util  -I../../XMemLib -c ../../util/HPC.cpp -o hpc.o
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O3 -Wall  -I../../util  -I../../XMemLib dsyr2k.o hpc.o -L../../XMemLib -lXMemLib -o dsyr2k.riscv
+make: Leaving directory '/home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/benchmarks/dsyr2k'

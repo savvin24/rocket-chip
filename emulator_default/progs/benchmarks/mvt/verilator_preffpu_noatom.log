@@ -1,0 +1,15 @@
+bbl loader
+In ATOM_INIT: Loaded AMU table
+cycles: 75597709
+instructions: 35538674
+accelerator misses: 0
+total misses: 0
+alb requests: 0
+alb hits: 0
+dtlb misses: 0
+alb misses: 0
+n/a: 0
+n/a: 0
+75597709,35538674,0,0,0,0,0,0,0,0
+[UART] UART0 is here (stdin/stdout).
+- /home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.PrefetcherRocketConfigWithFPUPerfCount/gen-collateral/TestDriver.v:158: Verilog $finish

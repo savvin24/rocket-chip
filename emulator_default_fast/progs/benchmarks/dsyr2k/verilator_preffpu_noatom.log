@@ -1,0 +1,20 @@
+bbl loader
+In ATOM_INIT: Loaded AMU table
+cycles: 581479178
+instructions: 144114627
+accelerator misses: 0
+total misses: 0
+alb requests: 0
+alb hits: 0
+dtlb misses: 0
+alb misses: 0
+n/a: 0
+n/a: 0
+581479178,144114627,0,0,0,0,0,0,0,0
+[UART] UART0 is here (stdin/stdout).
+[1242735845000] %Error: TestHarness.sv:166: Assertion failed in TOP.TestDriver.testHarness: Assertion failed: *** FAILED *** (exit code =    1228752)
+
+    at SimTSI.scala:21 assert(!error, "*** FAILED *** (exit code = %%d)\n", exit >> 1.U)
+
+%Error: /home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.PrefetcherRocketConfigWithFPUPerfCount/gen-collateral/TestHarness.sv:166: Verilog $stop
+Aborting...

@@ -32,6 +32,7 @@ class IntCtrlSigs(aluFn: ALUFN = ALUFN())(implicit val p: Parameters) extends Bu
   val alu_fn = Bits(aluFn.FN_X.getWidth.W)
   val mem = Bool()
   val mem_cmd = Bits(M_SZ.W)
+  //val mem_type = Bits(width = MT_SZ) //SAVVINA in old chipyard, used by metasys
   val rfs1 = Bool()
   val rfs2 = Bool()
   val rfs3 = Bool()
@@ -46,20 +47,21 @@ class IntCtrlSigs(aluFn: ALUFN = ALUFN())(implicit val p: Parameters) extends Bu
   val dp = Bool()
 
   def default: List[BitPat] =
-                //           jal                                                                 renf1               fence.i
-                //   val     | jalr                                                              | renf2             |
-                //   | fp_val| | renx2                                                           | | renf3           |
-                //   | | rocc| | | renx1       s_alu1                              mem_val       | | | wfd           |
-                //   | | | br| | | |   s_alu2  |       imm    dw     alu           | mem_cmd     | | | | mul         |
-                //   | | | | | | | |   |       |       |      |      |             | |           | | | | | div       | fence
-                //   | | | | | | | |   |       |       |      |      |             | |           | | | | | | wxd     | | amo
-                //   | | | | | | | |   |       |       |      |      |             | |           | | | | | | |       | | | dp
-                List(N,X,X,X,X,X,X,X,  A2_X,   A1_X,   IMM_X, DW_X,  aluFn.FN_X,   N,M_X,        X,X,X,X,X,X,X,CSR.X,X,X,X,X)
-
+                //           jal                                                                      renf1               fence.i
+                //   val     | jalr                                                                   | renf2             |
+                //   | fp_val| | renx2                                                                | | renf3           |
+                //   | | rocc| | | renx1       s_alu1                              mem_val            | | | wfd           |
+                //   | | | br| | | |   s_alu2  |       imm    dw     alu           | mem_cmd          | | | | mul         |
+                //   | | | | | | | |   |       |       |      |      |             | |                | | | | | div       | fence
+                //   | | | | | | | |   |       |       |      |      |             | |                | | | | | | wxd     | | amo
+                //   | | | | | | | |   |       |       |      |      |             | |                | | | | | | |       | | | dp
+                List(N,X,X,X,X,X,X,X,  A2_X,   A1_X,   IMM_X, DW_X,  aluFn.FN_X,   N,M_X,             X,X,X,X,X,X,X,CSR.X,X,X,X,X) //SAVVINA MT_X
+                //List(N,X,X,X,X,X,X,X,  A2_X,   A1_X,   IMM_X, DW_X,  aluFn.FN_X,   N,M_X,        MT_X,X,X,X,X,X,X,X,CSR.X,X,X,X,X) //SAVVINA MT_X
   def decode(inst: UInt, table: Iterable[(BitPat, List[BitPat])]) = {
     val decoder = DecodeLogic(inst, default, table)
     val sigs = Seq(legal, fp, rocc, branch, jal, jalr, rxs2, rxs1, sel_alu2,
-                   sel_alu1, sel_imm, alu_dw, alu_fn, mem, mem_cmd,
+                   //sel_alu1, sel_imm, alu_dw, alu_fn, mem, mem_cmd, mem_type, //SAVVINA mem_type
+                   sel_alu1, sel_imm, alu_dw, alu_fn, mem, mem_cmd, //SAVVINA mem_type
                    rfs1, rfs2, rfs3, wfd, mul, div, wxd, csr, fence_i, fence, amo, dp)
     sigs zip decoder map {case(s,d) => s := d}
     this

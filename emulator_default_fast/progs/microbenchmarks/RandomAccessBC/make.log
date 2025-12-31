@@ -1,0 +1,61 @@
+make: Entering directory '/home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/microbenchmarks/RandomAccessBC'
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O3 -Wall -DNOATOM -I../../util -I../../XMemLib -c random.cpp -o random_noatom.o
+random.cpp: In function 'int main()':
+random.cpp:36:44: warning: 'used' attribute ignored [-Wattributes]
+   36 |   volatile uint32_t* a __attribute__((used)) = (uint32_t*) malloc(arrSize);
+      |                                            ^
+random.cpp:37:35: warning: 'used' attribute ignored [-Wattributes]
+   37 |   uint32_t* b __attribute__((used)) = (uint32_t*) malloc(arrSize);
+      |                                   ^
+random.cpp:38:35: warning: 'used' attribute ignored [-Wattributes]
+   38 |   uint32_t* c __attribute__((used)) = (uint32_t*) malloc(arrSize);
+      |                                   ^
+random.cpp:46:12: warning: comparison of integer expressions of different signedness: 'int' and 'uint32_t' {aka 'unsigned int'} [-Wsign-compare]
+   46 |   for( ; i < arrSize/4 ; i += 1)
+      |          ~~^~~~~~~~~~~
+random.cpp:55:17: warning: comparison of integer expressions of different signedness: 'int' and 'uint32_t' {aka 'unsigned int'} [-Wsign-compare]
+   55 |   for(i = 0 ; i < arrSize/4 ; i += 1)
+      |               ~~^~~~~~~~~~~
+random.cpp:94:19: warning: comparison of integer expressions of different signedness: 'int' and 'uint32_t' {aka 'unsigned int'} [-Wsign-compare]
+   94 |     for(i = 0 ; i < arrSize/4 ; i += 1)
+      |                 ~~^~~~~~~~~~~
+random.cpp:41:12: warning: unused variable 'acc' [-Wunused-variable]
+   41 |   uint64_t acc = 0;
+      |            ^~~
+random.cpp:43:12: warning: unused variable 'mapSize' [-Wunused-variable]
+   43 |   uint32_t mapSize = arrSize/(1<<GRANULARITY) == 0 ? 1 : arrSize/(1<<GRANULARITY);
+      |            ^~~~~~~
+random.cpp:67:12: warning: variable 'atomattribs' set but not used [-Wunused-but-set-variable]
+   67 |   uint32_t atomattribs[16];
+      |            ^~~~~~~~~~~
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O3 -Wall -DNOATOM -I../../util -I../../XMemLib -c ../../util/HPC.cpp -o hpc_noatom.o
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O3 -Wall -DNOATOM -I../../util -I../../XMemLib random_noatom.o hpc_noatom.o -L../../XMemLib -lXMemLib -o random_noatom.riscv
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O3 -Wall  -I../../util -I../../XMemLib -c random.cpp -o random.o
+random.cpp: In function 'int main()':
+random.cpp:36:44: warning: 'used' attribute ignored [-Wattributes]
+   36 |   volatile uint32_t* a __attribute__((used)) = (uint32_t*) malloc(arrSize);
+      |                                            ^
+random.cpp:37:35: warning: 'used' attribute ignored [-Wattributes]
+   37 |   uint32_t* b __attribute__((used)) = (uint32_t*) malloc(arrSize);
+      |                                   ^
+random.cpp:38:35: warning: 'used' attribute ignored [-Wattributes]
+   38 |   uint32_t* c __attribute__((used)) = (uint32_t*) malloc(arrSize);
+      |                                   ^
+random.cpp:46:12: warning: comparison of integer expressions of different signedness: 'int' and 'uint32_t' {aka 'unsigned int'} [-Wsign-compare]
+   46 |   for( ; i < arrSize/4 ; i += 1)
+      |          ~~^~~~~~~~~~~
+random.cpp:55:17: warning: comparison of integer expressions of different signedness: 'int' and 'uint32_t' {aka 'unsigned int'} [-Wsign-compare]
+   55 |   for(i = 0 ; i < arrSize/4 ; i += 1)
+      |               ~~^~~~~~~~~~~
+random.cpp:94:19: warning: comparison of integer expressions of different signedness: 'int' and 'uint32_t' {aka 'unsigned int'} [-Wsign-compare]
+   94 |     for(i = 0 ; i < arrSize/4 ; i += 1)
+      |                 ~~^~~~~~~~~~~
+random.cpp:41:12: warning: unused variable 'acc' [-Wunused-variable]
+   41 |   uint64_t acc = 0;
+      |            ^~~
+random.cpp:67:12: warning: variable 'atomattribs' set but not used [-Wunused-but-set-variable]
+   67 |   uint32_t atomattribs[16];
+      |            ^~~~~~~~~~~
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O3 -Wall  -I../../util -I../../XMemLib -c ../../util/HPC.cpp -o hpc.o
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O3 -Wall  -I../../util -I../../XMemLib random.o hpc.o -L../../XMemLib -lXMemLib -o random.riscv
+make: Leaving directory '/home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/microbenchmarks/RandomAccessBC'

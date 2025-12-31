@@ -1,0 +1,18 @@
+bbl loader
+In ATOM_INIT: Loaded AMU table
+Read graph /home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/benchmarks/input_graph.txt
+Rows = 5 Non-zero = 7 
+BFS Finished
+cycles: 2474
+instructions: 1709
+accelerator misses: 0
+total misses: 0
+alb requests: 0
+alb hits: 0
+dtlb misses: 0
+alb misses: 0
+n/a: 0
+n/a: 0
+2474,1709,0,0,0,0,0,0,0,0
+[UART] UART0 is here (stdin/stdout).
+- /home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.IndirectPrefetcherBFSRocketConfigPerfCount/gen-collateral/TestDriver.v:158: Verilog $finish

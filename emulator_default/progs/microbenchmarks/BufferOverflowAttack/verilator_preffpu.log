@@ -1,0 +1,5 @@
+bbl loader
+strcpy() NOT executed....
+Syntax: /home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/microbenchmarks/BufferOverflowAttack/attack.riscv <characters>
+[UART] UART0 is here (stdin/stdout).
+- /home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.IndirectPrefetcherRocketConfigPerfCount/gen-collateral/TestDriver.v:158: Verilog $finish

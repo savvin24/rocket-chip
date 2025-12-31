@@ -1,0 +1,22 @@
+bbl loader
+In ATOM_INIT: Loaded AMU table
+In ATOM_INIT: Returned from amu_write_acr
+Read graph /home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/benchmarks/input_graph.txt
+Rows = 5 Non-zero = 7 
+z  0000000000000000 ra 000000000001eafc sp 0000003ffffff850 gp 000000000003e388
+tp 0000000000000000 t0 0000000000021676 t1 0000000000000000 t2 7fffffffffffffff
+s0 000000000003d850 s1 000000000003de20 a0 000000000003d850 a1 0000000000000000
+a2 0000000000000000 a3 000000000000000a a4 0000000000000000 a5 0000000000000000
+a6 0000000000035a21 a7 0000000000000006 s2 0000000000000000 s3 0000000000000000
+s4 0000000000000000 s5 0000000000000000 s6 0000000000000000 s7 0000000000000000
+s8 0000000000000000 s9 0000000000000000 sA 0000000000000000 sB 0000000000000000
+t3 0000000000000009 t4 000000000003d038 t5 0000000000000000 t6 ffffffffffffffff
+pc 000000000001f782 va/inst 0000000000000000 sr 800000020001e020
+User load segfault @ 0x0000000000000000
+[UART] UART0 is here (stdin/stdout).
+[75541095000] %Error: TestHarness.sv:166: Assertion failed in TOP.TestDriver.testHarness: Assertion failed: *** FAILED *** (exit code = 2147483647)
+
+    at SimTSI.scala:21 assert(!error, "*** FAILED *** (exit code = %%d)\n", exit >> 1.U)
+
+%Error: /home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.PrefetcherRocketConfigWithFPUPerfCount/gen-collateral/TestHarness.sv:166: Verilog $stop
+Aborting...

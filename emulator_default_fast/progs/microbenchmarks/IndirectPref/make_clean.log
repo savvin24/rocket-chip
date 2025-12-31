@@ -1,0 +1,3 @@
+make: Entering directory '/home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/microbenchmarks/IndirectPref'
+rm -f *.o ind_pref_microbenchmark.riscv *~
+make: Leaving directory '/home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/microbenchmarks/IndirectPref'

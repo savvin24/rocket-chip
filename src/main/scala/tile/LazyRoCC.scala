@@ -38,10 +38,39 @@ class RoCCResponse(implicit p: Parameters) extends CoreBundle()(p) {
   val data = Bits(xLen.W)
 }
 
+// SAVVINA added from MetaSys and modified a bit
+// 1. removed typ cause it isn't part of HasCoreMemOp anymore
+
+/* Could not import, TODO might need to fix */
+class CoreASPIO extends Bundle{
+  val valid    = Output(Bool())
+  val addr     = Output(UInt(40.W))
+  val cmd      = Output(UInt(5.W))
+  val size     = Output(UInt(3.W)) // SAVVINA replaced typ with size (might only need 2.W, not 3.W)
+  //val s1_paddr = Output(UInt(40.W))
+  val s2_paddr = Output(UInt(40.W))
+  val s1_kill  = Output(Bool())
+  val s2_nack  = Output(Bool())
+  val s2_xcpt  = Output((new HellaCacheExceptions))
+  val physical = Output(Bool())
+  val miss     = Output(Bool())
+  val bp_q_full= Input(Bool())
+  val bc_resolved = Input(Bool())
+
+  val dbg1  = Input(Bool())
+  val dbg2  = Input(Bool())
+  val dbg3  = Input(Bool())
+  val dbg4  = Input(Bool())
+}
+
 class RoCCCoreIO(val nRoCCCSRs: Int = 0)(implicit p: Parameters) extends CoreBundle()(p) {
   val cmd = Flipped(Decoupled(new RoCCCommand))
   val resp = Decoupled(new RoCCResponse)
   val mem = new HellaCacheIO
+  val mem_pref = new HellaCacheIO
+  val mem_amulookup = new HellaCacheIO
+  val core_snoop = Flipped(new CoreASPIO)
+  val ptw_snoop = Flipped(new CoreASPIO)
   val busy = Output(Bool())
   val interrupt = Output(Bool())
   val exception = Input(Bool())
@@ -59,6 +88,7 @@ abstract class LazyRoCC(
   val opcodes: OpcodeSet,
   val nPTWPorts: Int = 0,
   val usesFPU: Boolean = false,
+  val disableCommandRouter: Boolean = false, // SAVVINA added from MetaSys (a bit different)
   val roccCSRs: Seq[CustomCSR] = Nil
 )(implicit p: Parameters) extends LazyModule {
   val module: LazyRoCCModuleImp
@@ -69,7 +99,15 @@ abstract class LazyRoCC(
 
 class LazyRoCCModuleImp(outer: LazyRoCC) extends LazyModuleImp(outer) {
   val io = IO(new RoCCIO(outer.nPTWPorts, outer.roccCSRs.size))
-  io := DontCare
+  //io := DontCare //SAVVINA: commented out
+  // io.ptw_snoop.bp_q_full <> DontCare // SAVVINA
+  // io.ptw_snoop.bc_resolved <> DontCare // SAVVINA
+  // io.ptw_snoop.dbg1 <> DontCare // SAVVINA
+  // io.ptw_snoop.dbg2 <> DontCare // SAVVINA
+  // io.ptw_snoop.dbg3 <> DontCare // SAVVINA
+  // io.ptw_snoop.dbg4 <> DontCare // SAVVINA
+  // io.fpu_req <> DontCare // SAVVINA
+  // io.fpu_resp.ready <> DontCare // SAVVINA
 }
 
 /** Mixins for including RoCC **/
@@ -83,22 +121,43 @@ trait HasLazyRoCC extends CanHavePTW { this: BaseTile =>
   roccs.map(_.tlNode).foreach { tl => tlOtherMastersNode :=* tl }
 
   nPTWPorts += roccs.map(_.nPTWPorts).sum
-  nDCachePorts += roccs.size
+  nDCachePorts += (roccs.size*3) // SAVVINA changed from MetaSys
 }
+
+// SAVVINA added from MetaSys 
+  // TODO we cannot have multiple RoCC modules anymore
 
 trait HasLazyRoCCModule extends CanHavePTWModule
     with HasCoreParameters { this: RocketTileModuleImp with HasFpuOpt =>
 
+  //val breakDesign = outer.roccs.nonEmpty && outer.roccs(0).disableCommandRouter // SAVVINA added from MetaSys and modified a bit
+
   val (respArb, cmdRouter) = if(outer.roccs.nonEmpty) {
     val respArb = Module(new RRArbiter(new RoCCResponse()(outer.p), outer.roccs.size))
+    // Savvina comment: A round‐robin arbiter that merges up to nRocc incoming RoCCResponse streams (one from each accelerator) into a single response stream back to the core writeback path.
+    // if (breakDesign)
+    // {
+    //   println("Breaking Design") 
+
+    // }
     val cmdRouter = Module(new RoccCommandRouter(outer.roccs.map(_.opcodes))(outer.p))
+
+    // SAVVINA comment : dispatches each command into exactly one of its <outer.roccs.size outputs> (no of roccs), based on matching the instruction’s opcode against each accelerator’s OpcodeSet
+
     outer.roccs.zipWithIndex.foreach { case (rocc, i) =>
       rocc.module.io.ptw ++=: ptwPorts
-      rocc.module.io.cmd <> cmdRouter.io.out(i)
+      rocc.module.io.cmd <> cmdRouter.io.out(i) // SAVVINA comment: Connects each accelerator’s .cmd input to its dedicated output of the cmdRouter
+      rocc.module.io.ptw_snoop <> ptw.io.snoop //SAVVINA added from METASYS 
+      // SAVVINA misses rocc.module.io.core_snoop  <> roccCore.core_snoop from MetaSys cause no roccCore in this version of HasLazyRoCCModule
       val dcIF = Module(new SimpleHellaCacheIF()(outer.p))
       dcIF.io.requestor <> rocc.module.io.mem
       dcachePorts += dcIF.io.cache
-      respArb.io.in(i) <> Queue(rocc.module.io.resp)
+
+      // extra prefetch and AMU lookup ports
+      dcachePorts               += rocc.module.io.mem_pref // SAVVINA added from MetaSys
+      dcachePorts               += rocc.module.io.mem_amulookup // SAVVINA added from MetaSys
+
+      respArb.io.in(i) <> Queue(rocc.module.io.resp) // SAVVINA comment: Each accelerator’s .resp output is queued (to decouple timing) and fed into one input of the shared RRArbiter
     }
 
     fpuOpt foreach { fpu =>
@@ -130,6 +189,42 @@ class AccumulatorExample(opcodes: OpcodeSet, val n: Int = 4)(implicit p: Paramet
 
 class AccumulatorExampleModuleImp(outer: AccumulatorExample)(implicit p: Parameters) extends LazyRoCCModuleImp(outer)
     with HasCoreParameters {
+
+/* SAVVINA didn't exist in MetaSys repo */
+  io.mem.req.bits.no_alloc <> DontCare // SAVVINA
+  io.mem.req.bits.no_xcpt <> DontCare // SAVVINA
+  io.mem.req.bits.mask <> DontCare // SAVVINA
+  // io.mem.req.bits.isLookup <> DontCare // SAVVINA
+  io.mem.s1_kill <> DontCare // SAVVINA  
+  io.mem.s1_data <> DontCare // SAVVINA 
+  io.mem.s2_kill <> DontCare // SAVVINA
+  io.mem.keep_clock_enabled <> DontCare // SAVVINA
+  io.mem_pref.req <> DontCare // SAVVINA
+  io.mem_pref.s1_kill <> DontCare // SAVVINA
+  io.mem_pref.s1_data <> DontCare // SAVVINA
+  io.mem_pref.s2_kill <> DontCare // SAVVINA
+  io.mem_pref.keep_clock_enabled <> DontCare // SAVVINA
+  io.mem_amulookup.req <> DontCare // SAVVINA
+  io.mem_amulookup.s1_kill <> DontCare // SAVVINA
+  io.mem_amulookup.s1_data <> DontCare // SAVVINA
+  io.mem_amulookup.s2_kill <> DontCare // SAVVINA
+  io.mem_amulookup.keep_clock_enabled <> DontCare // SAVVINA
+  io.core_snoop.bp_q_full <> DontCare // SAVVINA
+  io.core_snoop.bc_resolved <> DontCare // SAVVINA
+  io.core_snoop.dbg1 <> DontCare // SAVVINA
+  io.core_snoop.dbg2 <> DontCare // SAVVINA
+  io.core_snoop.dbg3 <> DontCare // SAVVINA
+  io.core_snoop.dbg4 <> DontCare // SAVVINA
+  io.ptw_snoop.bp_q_full <> DontCare // SAVVINA
+  io.ptw_snoop.bc_resolved <> DontCare // SAVVINA
+  io.ptw_snoop.dbg1 <> DontCare // SAVVINA
+  io.ptw_snoop.dbg2 <> DontCare // SAVVINA
+  io.ptw_snoop.dbg3 <> DontCare // SAVVINA
+  io.ptw_snoop.dbg4 <> DontCare // SAVVINA
+  io.fpu_req.bits <> DontCare // SAVVINA
+  io.fpu_req.valid <> DontCare // SAVVINA
+  io.fpu_resp.ready <> DontCare // SAVVINA
+  
   val regfile = Mem(outer.n, UInt(xLen.W))
   val busy = RegInit(VecInit(Seq.fill(outer.n){false.B}))
 

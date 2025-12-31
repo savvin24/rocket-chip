@@ -1,0 +1,25 @@
+bbl loader
+Begin initializing arrays
+Initialized arrays
+Warmup Run
+Begin test
+In ATOM_INIT: Loaded AMU table
+In xorshift32: Returning from xorshift32
+IN HPC:startMeasurement: Returning from HPC:startMeasurement
+In xorshift32: Returning from xorshift32
+In xorshift32: Returning from xorshift32
+In xorshift32: Returning from xorshift32
+In xorshift32: Returning from xorshift32
+In xorshift32: Returning from xorshift32
+In xorshift32: Returning from xorshift32
+In xorshift32: Returning from xorshift32
+In xorshift32: Returning from xorshift32
+IN HPC:endMeasurement: Returning from HPC:endMeasurement
+End test
+cycles: 43088
+instructions: 28233
+IN HPC:printStats: Returning from HPC:printStats
+43088,28233
+IN HPC:printCSV: Returning from HPC:printCSV
+[UART] UART0 is here (stdin/stdout).
+- /home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.IndirectPrefetcherRocketConfigPerfCount/gen-collateral/TestDriver.v:158: Verilog $finish

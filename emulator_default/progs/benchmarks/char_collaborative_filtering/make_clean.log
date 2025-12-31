@@ -1,0 +1,3 @@
+make: Entering directory '/home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/benchmarks/char_collaborative_filtering'
+rm -f *.o cf_noatom.riscv cf.riscv *~
+make: Leaving directory '/home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/benchmarks/char_collaborative_filtering'

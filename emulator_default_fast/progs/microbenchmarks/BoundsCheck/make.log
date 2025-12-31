@@ -1,0 +1,5 @@
+make: Entering directory '/home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/microbenchmarks/BoundsCheck'
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O2 -finline-small-functions -I../../util  -I../../XMemLib -c demo.cpp -o demo.o
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O2 -finline-small-functions -I../../util  -I../../XMemLib -c ../../util/HPC.cpp -o hpc.o
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O2 -finline-small-functions -I../../util  -I../../XMemLib demo.o hpc.o -L../../XMemLib -lXMemLib -o demo.riscv
+make: Leaving directory '/home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/microbenchmarks/BoundsCheck'

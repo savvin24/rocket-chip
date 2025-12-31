@@ -82,9 +82,10 @@ trait HasNonDiplomaticTileParameters {
   def lgCacheBlockBytes = log2Up(cacheBlockBytes)
   def masterPortBeatBytes = p(SystemBusKey).beatBytes
 
+  // METASYS TODO Temporary fix to connect prefetcher embedded in the accelerator to dmem
   // TODO make HellaCacheIO diplomatic and remove this brittle collection of hacks
   //                  Core   PTW                DTIM                    coprocessors           
-  def dcacheArbPorts = 1 + usingVM.toInt + usingDataScratchpad.toInt + p(BuildRoCC).size + (tileParams.core.useVector && tileParams.core.vectorUseDCache).toInt
+  def dcacheArbPorts = 1 + usingVM.toInt + usingDataScratchpad.toInt + (p(BuildRoCC).size * 3)+ (tileParams.core.useVector && tileParams.core.vectorUseDCache).toInt // SAVVINA changed from MetaSys
 
   // TODO merge with isaString in CSR.scala
   def isaDTS: String = {

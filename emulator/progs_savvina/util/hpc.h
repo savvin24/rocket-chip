@@ -1,0 +1,360 @@
+void hpcInit();
+void hpcStartMeasurement();
+void hpcEndMeasurement();
+void hpcPrint();
+
+#define INST_COMMIT_EVENTS 0x100
+#define EXCEPTION_TAKEN INST_COMMIT_EVENTS
+#define INTEGER_LOAD_INSTRUCTION_RETIRED INST_COMMIT_EVENTS<<1
+#define INTEGER_STORE_INSTRUCTION_RETIRED INST_COMMIT_EVENTS<<2
+#define ATOMIC_MEMORY_OPERATION_RETIRED INST_COMMIT_EVENTS<<3
+#define SYSTEM_INSTRUCTION_RETIRED INST_COMMIT_EVENTS<<4
+#define INTEGER_ARITHMETIC_INSTRUCTION_RETIRED INST_COMMIT_EVENTS<<5
+#define CONDITIONAL_BRANCH_RETIRED INST_COMMIT_EVENTS<<6
+#define JAL_INSTRUCTION_RETIRED INST_COMMIT_EVENTS<<7
+#define JALR_INSTRUCTION_RETIRED INST_COMMIT_EVENTS<<8
+#define INTEGER_MULTIPLICATION_INSTRUCTION_RETIRED INST_COMMIT_EVENTS<<9
+#define INTEGER_DIVISION_INSTRUCTION_RETIRED INST_COMMIT_EVENTS<<10
+#define FLOATING_POINT_LOAD_INSTRUCTION_RETIRED INST_COMMIT_EVENTS<<11
+#define FLOATING_POINT_STORE_INSTRUCTION_RETIRED INST_COMMIT_EVENTS<<12
+#define FLOATING_POINT_ADDITION_INSTRUCTION_RETIRED INST_COMMIT_EVENTS<<13
+#define FLOATING_POINT_MULTIPLICATION_INSTRUCTION_RETIRED INST_COMMIT_EVENTS<<14
+#define FLOATING_POINT_FUSED_MULTIPLY_ADD_RETIRED INST_COMMIT_EVENTS<<15
+#define FLAOTING_POINT_DIVISION_SQRT_RETIRED INST_COMMIT_EVENTS<<16
+#define OTHER_FLOATING_POINT_INSTRUCTION_RETIRED INST_COMMIT_EVENTS<<17
+
+#define MICROARCHTECTURAL_EVENTS 0x1
+#define LOAD_USE_INTERLOCK 0x1 | (0x100<<0)
+#define LONG_LATENCY_INTERLOCK 0x1 | (0x100<<1)
+#define CSR_READ_INTERLOCK 0x1 | (0x100<<2)
+#define INSTRUCTION_CACHE_ITIM_BUSY 0x1 | (0x100<<3) // SAVVINA COMMENT "I$ blocked"
+#define DATA_CACHE_DTIM_BUSY 0x1 | (0x100<<4)        // SAVVINA COMMENT "D$ blocked"
+#define BRANCH_DIRECTION_MISPREDICTION 0x1 | (0x100<<5)
+#define BRANCH_JUMP_TARGET_MISPREDICTION 0x1 | (0x100<<6) // SAVVINA COMMENT "control-flow target misprediction"
+#define PIPELINE_FLUSH_FROM_CSR_WRITE 0x1 | (0x100<<7)
+#define PIPELINE_FLUSH_FROM_OTHER_EVENT 0x1 | (0x100<<8)
+#define INTEGER_MULTIPLICATION_INTERLOCK 0x1 | (0x100<<9) // SAVVINA COMMENT "replay"
+#define FLOATING_POINT_INTERLOCK 0x1 | (0x100<<10)
+
+#define MEMORY_SYSTEM_EVENTS 0x2
+#define INSTRUCTION_CACHE_MISS 0x2 | (0x100<<0)
+#define DATA_CACHE_MISS_OR_MEMORY_MAPPED_IO_ACCESS 0x2 | (0x100<<1)
+#define DATA_CACHE_WRITEBACK 0x2 | (0x100<<2)  // SAVVINA comment: D$ release
+#define INSTRUCTION_TLB_MISS 0x2 | (0x100<<3)
+#define DATA_TLB_MISS 0x2 | (0x100<<4)
+#define L2_TLB_MISS 0x2 | (0x100<<5)
+
+/* Machine counters/timers */
+#define CSR_MCYCLE 0xb00
+#define CSR_MINSTRET 0xb02
+#define CSR_MHPMCOUNTER3 0xb03
+#define CSR_MHPMCOUNTER4 0xb04
+#define CSR_MHPMCOUNTER5 0xb05
+#define CSR_MHPMCOUNTER6 0xb06
+#define CSR_MHPMCOUNTER7 0xb07
+#define CSR_MHPMCOUNTER8 0xb08
+#define CSR_MHPMCOUNTER9 0xb09
+#define CSR_MHPMCOUNTER10 0xb0a
+#define CSR_MHPMCOUNTER11 0xb0b
+#define CSR_MHPMCOUNTER12 0xb0c
+#define CSR_MHPMCOUNTER13 0xb0d
+#define CSR_MHPMCOUNTER14 0xb0e
+#define CSR_MHPMCOUNTER15 0xb0f
+#define CSR_MHPMCOUNTER16 0xb10
+#define CSR_MHPMCOUNTER17 0xb11
+#define CSR_MHPMCOUNTER18 0xb12
+#define CSR_MHPMCOUNTER19 0xb13
+#define CSR_MHPMCOUNTER20 0xb14
+#define CSR_MHPMCOUNTER21 0xb15
+#define CSR_MHPMCOUNTER22 0xb16
+#define CSR_MHPMCOUNTER23 0xb17
+#define CSR_MHPMCOUNTER24 0xb18
+#define CSR_MHPMCOUNTER25 0xb19
+#define CSR_MHPMCOUNTER26 0xb1a
+#define CSR_MHPMCOUNTER27 0xb1b
+#define CSR_MHPMCOUNTER28 0xb1c
+#define CSR_MHPMCOUNTER29 0xb1d
+#define CSR_MHPMCOUNTER30 0xb1e
+#define CSR_MHPMCOUNTER31 0xb1f
+
+/* Machine counter setup */
+#define CSR_MHPMEVENT3 0x323
+#define CSR_MHPMEVENT4 0x324
+#define CSR_MHPMEVENT5 0x325
+#define CSR_MHPMEVENT6 0x326
+#define CSR_MHPMEVENT7 0x327
+#define CSR_MHPMEVENT8 0x328
+#define CSR_MHPMEVENT9 0x329
+#define CSR_MHPMEVENT10 0x32a
+#define CSR_MHPMEVENT11 0x32b
+#define CSR_MHPMEVENT12 0x32c
+#define CSR_MHPMEVENT13 0x32d
+#define CSR_MHPMEVENT14 0x32e
+#define CSR_MHPMEVENT15 0x32f
+#define CSR_MHPMEVENT16 0x330
+#define CSR_MHPMEVENT17 0x331
+#define CSR_MHPMEVENT18 0x332
+#define CSR_MHPMEVENT19 0x333
+#define CSR_MHPMEVENT20 0x334
+#define CSR_MHPMEVENT21 0x335
+#define CSR_MHPMEVENT22 0x336
+#define CSR_MHPMEVENT23 0x337
+#define CSR_MHPMEVENT24 0x338
+#define CSR_MHPMEVENT25 0x339
+#define CSR_MHPMEVENT26 0x33a
+#define CSR_MHPMEVENT27 0x33b
+#define CSR_MHPMEVENT28 0x33c
+#define CSR_MHPMEVENT29 0x33d
+#define CSR_MHPMEVENT30 0x33e
+#define CSR_MHPMEVENT31 0x33f
+
+/* Supervisor counter enable */
+#define CSR_SCOUNTEREN 0x106
+/* Supervisor counter inhibit */
+#define CSR_SCOUNTINHIBIT 0X120
+#define CSR_MCOUNTEREN 0x306
+#define CSR_MCOUNTINHIBIT 0x320
+
+/* Unprivileged counters/timers */
+#define CSR_CYCLE 0xc00
+#define CSR_TIME 0xc01
+#define CSR_INSTRET 0xc02
+#define CSR_HPMCOUNTER3 0xc03
+#define CSR_HPMCOUNTER4 0xc04
+#define CSR_HPMCOUNTER5 0xc05
+#define CSR_HPMCOUNTER6 0xc06
+#define CSR_HPMCOUNTER7 0xc07
+#define CSR_HPMCOUNTER8 0xc08
+#define CSR_HPMCOUNTER9 0xc09
+#define CSR_HPMCOUNTER10 0xc0a
+#define CSR_HPMCOUNTER11 0xc0b
+#define CSR_HPMCOUNTER12 0xc0c
+#define CSR_HPMCOUNTER13 0xc0d
+#define CSR_HPMCOUNTER14 0xc0e
+#define CSR_HPMCOUNTER15 0xc0f
+#define CSR_HPMCOUNTER16 0xc10
+#define CSR_HPMCOUNTER17 0xc11
+#define CSR_HPMCOUNTER18 0xc12
+#define CSR_HPMCOUNTER19 0xc13
+#define CSR_HPMCOUNTER20 0xc14
+#define CSR_HPMCOUNTER21 0xc15
+#define CSR_HPMCOUNTER22 0xc16
+#define CSR_HPMCOUNTER23 0xc17
+#define CSR_HPMCOUNTER24 0xc18
+#define CSR_HPMCOUNTER25 0xc19
+#define CSR_HPMCOUNTER26 0xc1a
+#define CSR_HPMCOUNTER27 0xc1b
+#define CSR_HPMCOUNTER28 0xc1c
+#define CSR_HPMCOUNTER29 0xc1d
+#define CSR_HPMCOUNTER30 0xc1e
+#define CSR_HPMCOUNTER31 0xc1f
+
+// #ifdef DECLARE_CSR
+// DECLARE_CSR(cycle, CSR_CYCLE)
+// DECLARE_CSR(time, CSR_TIME)
+// DECLARE_CSR(instret, CSR_INSTRET)
+// DECLARE_CSR(hpmcounter3, CSR_HPMCOUNTER3)
+// DECLARE_CSR(hpmcounter4, CSR_HPMCOUNTER4)
+// DECLARE_CSR(hpmcounter5, CSR_HPMCOUNTER5)
+// DECLARE_CSR(hpmcounter6, CSR_HPMCOUNTER6)
+// DECLARE_CSR(hpmcounter7, CSR_HPMCOUNTER7)
+// DECLARE_CSR(hpmcounter8, CSR_HPMCOUNTER8)
+// DECLARE_CSR(hpmcounter9, CSR_HPMCOUNTER9)
+// DECLARE_CSR(hpmcounter10, CSR_HPMCOUNTER10)
+// DECLARE_CSR(hpmcounter11, CSR_HPMCOUNTER11)
+// DECLARE_CSR(hpmcounter12, CSR_HPMCOUNTER12)
+// DECLARE_CSR(hpmcounter13, CSR_HPMCOUNTER13)
+// DECLARE_CSR(hpmcounter14, CSR_HPMCOUNTER14)
+// DECLARE_CSR(hpmcounter15, CSR_HPMCOUNTER15)
+// DECLARE_CSR(hpmcounter16, CSR_HPMCOUNTER16)
+// DECLARE_CSR(hpmcounter17, CSR_HPMCOUNTER17)
+// DECLARE_CSR(hpmcounter18, CSR_HPMCOUNTER18)
+// DECLARE_CSR(hpmcounter19, CSR_HPMCOUNTER19)
+// DECLARE_CSR(hpmcounter20, CSR_HPMCOUNTER20)
+// DECLARE_CSR(hpmcounter21, CSR_HPMCOUNTER21)
+// DECLARE_CSR(hpmcounter22, CSR_HPMCOUNTER22)
+// DECLARE_CSR(hpmcounter23, CSR_HPMCOUNTER23)
+// DECLARE_CSR(hpmcounter24, CSR_HPMCOUNTER24)
+// DECLARE_CSR(hpmcounter25, CSR_HPMCOUNTER25)
+// DECLARE_CSR(hpmcounter26, CSR_HPMCOUNTER26)
+// DECLARE_CSR(hpmcounter27, CSR_HPMCOUNTER27)
+// DECLARE_CSR(hpmcounter28, CSR_HPMCOUNTER28)
+// DECLARE_CSR(hpmcounter29, CSR_HPMCOUNTER29)
+// DECLARE_CSR(hpmcounter30, CSR_HPMCOUNTER30)
+// DECLARE_CSR(hpmcounter31, CSR_HPMCOUNTER31)
+
+// DECLARE_CSR(scounteren, CSR_SCOUNTEREN)
+// DECLARE_CSR(mcounteren, CSR_MCOUNTEREN)
+
+// DECLARE_CSR(mcycle, CSR_MCYCLE)
+// DECLARE_CSR(minstret, CSR_MINSTRET)
+// DECLARE_CSR(mhpmcounter3, CSR_MHPMCOUNTER3)
+// DECLARE_CSR(mhpmcounter4, CSR_MHPMCOUNTER4)
+// DECLARE_CSR(mhpmcounter5, CSR_MHPMCOUNTER5)
+// DECLARE_CSR(mhpmcounter6, CSR_MHPMCOUNTER6)
+// DECLARE_CSR(mhpmcounter7, CSR_MHPMCOUNTER7)
+// DECLARE_CSR(mhpmcounter8, CSR_MHPMCOUNTER8)
+// DECLARE_CSR(mhpmcounter9, CSR_MHPMCOUNTER9)
+// DECLARE_CSR(mhpmcounter10, CSR_MHPMCOUNTER10)
+// DECLARE_CSR(mhpmcounter11, CSR_MHPMCOUNTER11)
+// DECLARE_CSR(mhpmcounter12, CSR_MHPMCOUNTER12)
+// DECLARE_CSR(mhpmcounter13, CSR_MHPMCOUNTER13)
+// DECLARE_CSR(mhpmcounter14, CSR_MHPMCOUNTER14)
+// DECLARE_CSR(mhpmcounter15, CSR_MHPMCOUNTER15)
+// DECLARE_CSR(mhpmcounter16, CSR_MHPMCOUNTER16)
+// DECLARE_CSR(mhpmcounter17, CSR_MHPMCOUNTER17)
+// DECLARE_CSR(mhpmcounter18, CSR_MHPMCOUNTER18)
+// DECLARE_CSR(mhpmcounter19, CSR_MHPMCOUNTER19)
+// DECLARE_CSR(mhpmcounter20, CSR_MHPMCOUNTER20)
+// DECLARE_CSR(mhpmcounter21, CSR_MHPMCOUNTER21)
+// DECLARE_CSR(mhpmcounter22, CSR_MHPMCOUNTER22)
+// DECLARE_CSR(mhpmcounter23, CSR_MHPMCOUNTER23)
+// DECLARE_CSR(mhpmcounter24, CSR_MHPMCOUNTER24)
+// DECLARE_CSR(mhpmcounter25, CSR_MHPMCOUNTER25)
+// DECLARE_CSR(mhpmcounter26, CSR_MHPMCOUNTER26)
+// DECLARE_CSR(mhpmcounter27, CSR_MHPMCOUNTER27)
+// DECLARE_CSR(mhpmcounter28, CSR_MHPMCOUNTER28)
+// DECLARE_CSR(mhpmcounter29, CSR_MHPMCOUNTER29)
+// DECLARE_CSR(mhpmcounter30, CSR_MHPMCOUNTER30)
+// DECLARE_CSR(mhpmcounter31, CSR_MHPMCOUNTER31)
+// DECLARE_CSR(mhpmevent3, CSR_MHPMEVENT3)
+// DECLARE_CSR(mhpmevent4, CSR_MHPMEVENT4)
+// DECLARE_CSR(mhpmevent5, CSR_MHPMEVENT5)
+// DECLARE_CSR(mhpmevent6, CSR_MHPMEVENT6)
+// DECLARE_CSR(mhpmevent7, CSR_MHPMEVENT7)
+// DECLARE_CSR(mhpmevent8, CSR_MHPMEVENT8)
+// DECLARE_CSR(mhpmevent9, CSR_MHPMEVENT9)
+// DECLARE_CSR(mhpmevent10, CSR_MHPMEVENT10)
+// DECLARE_CSR(mhpmevent11, CSR_MHPMEVENT11)
+// DECLARE_CSR(mhpmevent12, CSR_MHPMEVENT12)
+// DECLARE_CSR(mhpmevent13, CSR_MHPMEVENT13)
+// DECLARE_CSR(mhpmevent14, CSR_MHPMEVENT14)
+// DECLARE_CSR(mhpmevent15, CSR_MHPMEVENT15)
+// DECLARE_CSR(mhpmevent16, CSR_MHPMEVENT16)
+// DECLARE_CSR(mhpmevent17, CSR_MHPMEVENT17)
+// DECLARE_CSR(mhpmevent18, CSR_MHPMEVENT18)
+// DECLARE_CSR(mhpmevent19, CSR_MHPMEVENT19)
+// DECLARE_CSR(mhpmevent20, CSR_MHPMEVENT20)
+// DECLARE_CSR(mhpmevent21, CSR_MHPMEVENT21)
+// DECLARE_CSR(mhpmevent22, CSR_MHPMEVENT22)
+// DECLARE_CSR(mhpmevent23, CSR_MHPMEVENT23)
+// DECLARE_CSR(mhpmevent24, CSR_MHPMEVENT24)
+// DECLARE_CSR(mhpmevent25, CSR_MHPMEVENT25)
+// DECLARE_CSR(mhpmevent26, CSR_MHPMEVENT26)
+// DECLARE_CSR(mhpmevent27, CSR_MHPMEVENT27)
+// DECLARE_CSR(mhpmevent28, CSR_MHPMEVENT28)
+// DECLARE_CSR(mhpmevent29, CSR_MHPMEVENT29)
+// DECLARE_CSR(mhpmevent30, CSR_MHPMEVENT30)
+// DECLARE_CSR(mhpmevent31, CSR_MHPMEVENT31)
+// #endif
+
+// mhpmeventn addresses (in /home/savvina/chipyard/generators/rocket-chip/src/main/scala/rocket/Instructions.scala) 
+
+//#define MHPMEVENT3 0x323
+//#define MHPMEVENT4 0x324
+//#define MHPMEVENT5 0x325
+//#define MHPMEVENT6 0x326
+//#define MHPMEVENT7 0x327
+//#define MHPMEVENT8 0x328
+//#define MHPMEVENT9 0x329
+//#define MHPMEVENT10 0x32a
+//#define MHPMEVENT11 0x32b
+//#define MHPMEVENT12 0x32c
+//#define MHPMEVENT13 0x32d
+//#define MHPMEVENT14 0x32e
+//#define MHPMEVENT15 0x32f
+//#define MHPMEVENT16 0x330
+//#define MHPMEVENT17 0x331
+//#define MHPMEVENT18 0x332
+//#define MHPMEVENT19 0x333
+//#define MHPMEVENT20 0x334
+//#define MHPMEVENT21 0x335
+//#define MHPMEVENT22 0x336
+//#define MHPMEVENT23 0x337
+//#define MHPMEVENT24 0x338
+//#define MHPMEVENT25 0x339
+//#define MHPMEVENT26 0x33a
+//#define MHPMEVENT27 0x33b
+//#define MHPMEVENT28 0x33c
+//#define MHPMEVENT29 0x33d
+//#define MHPMEVENT30 0x33e
+//#define MHPMEVENT31 0x33f
+
+
+// (in /home/savvina/chipyard/generators/rocket-chip/src/main/scala/rocket/Instructions.scala) 
+
+//#define MCOUNTEREN 0x306
+//#define SCOUNTEREN 0x106
+//#define MCOUNTINHIBIT 0x320
+
+
+// CYCLE, TIME, INSTRET, HPMCOUNTERN addresses (in /home/savvina/chipyard/generators/rocket-chip/src/main/scala/rocket/Instructions.scala) 
+/*
+#define CYCLE_COUNTER 0xc00
+#define TIME_COUNTER 0xc01
+#define INSTRET_COUNTER 0xc02
+#define HPMCOUNTER3 0xc03
+#define HPMCOUNTER4 0xc04
+#define HPMCOUNTER5 0xc05
+#define HPMCOUNTER6 0xc06
+#define HPMCOUNTER7 0xc07
+#define HPMCOUNTER8 0xc08
+#define HPMCOUNTER9 0xc09
+#define HPMCOUNTER10 0xc0a
+#define HPMCOUNTER11 0xc0b
+#define HPMCOUNTER12 0xc0c
+#define HPMCOUNTER13 0xc0d
+#define HPMCOUNTER14 0xc0e
+#define HPMCOUNTER15 0xc0f
+#define HPMCOUNTER16 0xc10
+#define HPMCOUNTER17 0xc11
+#define HPMCOUNTER18 0xc12
+#define HPMCOUNTER19 0xc13
+#define HPMCOUNTER20 0xc14
+#define HPMCOUNTER21 0xc15
+#define HPMCOUNTER22 0xc16
+#define HPMCOUNTER23 0xc17
+#define HPMCOUNTER24 0xc18
+#define HPMCOUNTER25 0xc19
+#define HPMCOUNTER26 0xc1a
+#define HPMCOUNTER27 0xc1b
+#define HPMCOUNTER28 0xc1c
+#define HPMCOUNTER29 0xc1d
+#define HPMCOUNTER30 0xc1e
+#define HPMCOUNTER31 0xc1f
+*/
+
+
+#define pseudo_write_csr_immediate(reg, val) ({ \
+  asm volatile ("csrw " #reg ", %0" :: "rK"(val)); }) // Equivalent to "csrrw x0, csr, rs1"
+
+#define pseudo_read_csr_immediate(reg) ({ unsigned long __tmp; \
+  asm volatile ("csrr %0, " #reg : "=r"(__tmp)); \ 
+  __tmp; }) // Equivalent to "csrrs rd, csr, x0"
+
+/*
+#define read_set_csr(reg, bit) ({ unsigned long __tmp; \
+  asm volatile ("csrrs %0, " #reg ", %1" : "=r"(__tmp) : "rK"(bit)); \
+  __tmp; })
+*/
+#define read_clear_csr(reg, bit) ({ unsigned long __tmp; \
+  asm volatile ("csrrc %0, " #reg ", %1" : "=r"(__tmp) : "rK"(bit)); \
+  __tmp; })
+
+/*
+#define read_csr(reg) ({ unsigned long __tmp; \
+  asm volatile ("csrrs %0, " #reg ", x0" : "=r"(__tmp)); \
+  __tmp; })
+*/
+
+#define read_mcycle() ({ unsigned long __tmp; \
+  asm volatile ("rdcycle %0" : "=r"(__tmp)); \
+  __tmp; })
+
+#define read_mtime() ({ unsigned long __tmp; \
+  asm volatile ("rdtime %0" : "=r"(__tmp)); \
+  __tmp; })
+
+#define read_minstret() ({ unsigned long __tmp; \
+  asm volatile ("rdinstret %0" : "=r"(__tmp)); \
+  __tmp; })

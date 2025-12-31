@@ -1,0 +1,16 @@
+bbl loader
+Start Test
+Atom Defined
+In ATOM_INIT: Loaded AMU table
+In ATOM_INIT: Returned from amu_write_acr
+Atom Initialized
+IN ATOM_DEFINE: Returned from amu_atom_create
+IN ATOM_DEFINE: Returned from amu_atom_create
+IN ATOM_MAP: Returned from amu_write_len
+IN ATOM_MAP: Returned from amu_map
+IN ATOM_SELECT: Returned from bc_atom_select
+WORKS 1
+WORKS 2
+SHOULD not work 3
+[UART] UART0 is here (stdin/stdout).
+- /home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.BoundsCheckerRocketConfigPerfCount/gen-collateral/TestDriver.v:158: Verilog $finish

@@ -11,6 +11,151 @@ import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.rocket._
 import freechips.rocketchip.tile._
 import freechips.rocketchip.util._
+import tile.ListPrefetcherComplete39InitialRqtNoswait
+import tile.ListPrefetcherComplete39InitialRqtNoswaitRPT
+import tile.ListPrefetcherComplete39InitialNoRqtNoswaitRPT
+import tile.ListPrefetcherComplete39
+import tile.ListPrefetcherComplete39InitialRqtNoswaitRPTCLOSERTOSLOW
+import tile.ListPrefetcher2048X11CycleRDLatencyNorenInitialRqtNoswaitRPT
+import tile.ListPrefetcher2048X11CycleRDLatencyNorenInitialNoRqtNoswaitRPT
+import tile.AtomAddressMapController2048X11CycleRDLatencyNorenConfig
+import tile.ListPrefetcherComplete39MAPUPDATEInitialRqtNoswaitRPT
+
+//////////////// FINAL CONFIGS ///////////////////////
+
+class ListPrefetcherCompleteInitialRqtNoswaitRPTExactlySame39Config(albSize: Int, atomGranularity: Int, enablePrefetch: Boolean, lookupOnly: Boolean, disableRedundancyChecks: Boolean, rqtSize: Int, rptSize: Int) extends Config((site, here, up) => {
+  case MonitorsEnabled => false
+  case BuildRoCC => Seq(
+    (p: Parameters) => {
+      val atomAddressMap = LazyModule(
+        new ListPrefetcherComplete39InitialRqtNoswaitRPT(opcodes = OpcodeSet.custom2, albSize = albSize,
+                             atomGranularity = atomGranularity, enablePrefetch = enablePrefetch, lookupOnly = lookupOnly, disableRedundancyChecks = disableRedundancyChecks, rqtSize = rqtSize, rptSize = rptSize)(p) {
+          override val nPTWPorts = 1
+        })
+      atomAddressMap
+    })
+})
+
+class ListPrefetcherCompleteInitialNoRqtNoswaitRPTExactlySame39Config(albSize: Int, atomGranularity: Int, enablePrefetch: Boolean, lookupOnly: Boolean, disableRedundancyChecks: Boolean, rqtSize: Int, rptSize: Int) extends Config((site, here, up) => {
+  case MonitorsEnabled => false
+  case BuildRoCC => Seq(
+    (p: Parameters) => {
+      val atomAddressMap = LazyModule(
+        new ListPrefetcherComplete39InitialNoRqtNoswaitRPT(opcodes = OpcodeSet.custom2, albSize = albSize,
+                             atomGranularity = atomGranularity, enablePrefetch = enablePrefetch, lookupOnly = lookupOnly, disableRedundancyChecks = disableRedundancyChecks, rqtSize = rqtSize, rptSize = rptSize)(p) {
+          override val nPTWPorts = 1
+        })
+      atomAddressMap
+    })
+})
+
+class ListPrefetcherComplete39MAPUPDATEInitialRqtNoswaitRPTExactlySameConfig(albSize: Int, atomGranularity: Int, enablePrefetch: Boolean, lookupOnly: Boolean, disableRedundancyChecks: Boolean, rqtSize: Int, rptSize: Int) extends Config((site, here, up) => {
+  case MonitorsEnabled => false
+  case BuildRoCC => Seq(
+    (p: Parameters) => {
+      val atomAddressMap = LazyModule(
+        new ListPrefetcherComplete39MAPUPDATEInitialRqtNoswaitRPT(opcodes = OpcodeSet.custom2, albSize = albSize,
+                             atomGranularity = atomGranularity, enablePrefetch = enablePrefetch, lookupOnly = lookupOnly, disableRedundancyChecks = disableRedundancyChecks, rqtSize = rqtSize, rptSize = rptSize)(p) {
+          override val nPTWPorts = 1
+        })
+      atomAddressMap
+    })
+})
+
+class ListPrefetcher2048X11CycleRDLatencyNorenInitialRqtNoswaitRPTExactlySameConfig(albSize: Int, atomGranularity: Int, enablePrefetch: Boolean, lookupOnly: Boolean, disableRedundancyChecks: Boolean, rqtSize: Int, rptSize: Int) extends Config((site, here, up) => {
+  case MonitorsEnabled => false
+  case BuildRoCC => Seq(
+    (p: Parameters) => {
+      val atomAddressMap = LazyModule(
+        new ListPrefetcher2048X11CycleRDLatencyNorenInitialRqtNoswaitRPT(opcodes = OpcodeSet.custom2, albSize = albSize,
+                             atomGranularity = atomGranularity, enablePrefetch = enablePrefetch, lookupOnly = lookupOnly, disableRedundancyChecks = disableRedundancyChecks, rqtSize = rqtSize, rptSize = rptSize)(p) {
+          override val nPTWPorts = 1
+        })
+      atomAddressMap
+    })
+})
+
+class ListPrefetcher2048X11CycleRDLatencyNorenInitialNoRqtNoswaitRPTExactlySameConfig(albSize: Int, atomGranularity: Int, enablePrefetch: Boolean, lookupOnly: Boolean, disableRedundancyChecks: Boolean, rqtSize: Int, rptSize: Int) extends Config((site, here, up) => {
+  case MonitorsEnabled => false
+  case BuildRoCC => Seq(
+    (p: Parameters) => {
+      val atomAddressMap = LazyModule(
+        new ListPrefetcher2048X11CycleRDLatencyNorenInitialNoRqtNoswaitRPT(opcodes = OpcodeSet.custom2, albSize = albSize,
+                             atomGranularity = atomGranularity, enablePrefetch = enablePrefetch, lookupOnly = lookupOnly, disableRedundancyChecks = disableRedundancyChecks, rqtSize = rqtSize, rptSize = rptSize)(p) {
+          override val nPTWPorts = 1
+        })
+      atomAddressMap
+    })
+})
+
+class AtomAddressMapController2048X11CycleRDLatencyNorenSubsystemConfig(atomGranularity: Int, isPhysical: Boolean, isDummy: Boolean) extends Config((site, here, up) => {
+  case MonitorsEnabled => false
+  case BuildRoCC => Seq(
+    (p: Parameters) => {
+      val atomAddressMap = LazyModule(
+        new AtomAddressMapController2048X11CycleRDLatencyNorenConfig(opcodes = OpcodeSet.custom2,
+                             atomGranularity = atomGranularity, isPhysical = isPhysical, isDummy = isDummy)(p) {
+          override val nPTWPorts = 1
+        })
+      atomAddressMap
+    })
+})
+
+//////////////////////////////////////////////////////////////////////////
+
+class ListPrefetcherCompleteInitialRqtNoswaitExactlySame39Config(albSize: Int, atomGranularity: Int, enablePrefetch: Boolean, lookupOnly: Boolean, rqtSize: Int) extends Config((site, here, up) => {
+  case MonitorsEnabled => false
+  case BuildRoCC => Seq(
+    (p: Parameters) => {
+      val atomAddressMap = LazyModule(
+        new ListPrefetcherComplete39InitialRqtNoswait(opcodes = OpcodeSet.custom2, albSize = albSize,
+                             atomGranularity = atomGranularity, enablePrefetch = enablePrefetch, lookupOnly = lookupOnly, rqtSize = rqtSize)(p) {
+          override val nPTWPorts = 1
+        })
+      atomAddressMap
+    })
+})
+
+class ListPrefetcherCompleteInitialRqtNoswaitRPT8xSYSTEMBUSExactlySame39Config(albSize: Int, atomGranularity: Int, enablePrefetch: Boolean, lookupOnly: Boolean, disableRedundancyChecks: Boolean, rqtSize: Int, rptSize: Int) extends Config((site, here, up) => {
+  case MonitorsEnabled => false
+  case SystemBusKey => up(SystemBusKey, site).copy(beatBytes = site(XLen)/8*8)
+  case BuildRoCC => Seq(
+    (p: Parameters) => {
+      val atomAddressMap = LazyModule(
+        new ListPrefetcherComplete39InitialRqtNoswaitRPT(opcodes = OpcodeSet.custom2, albSize = albSize,
+                             atomGranularity = atomGranularity, enablePrefetch = enablePrefetch, lookupOnly = lookupOnly, disableRedundancyChecks = disableRedundancyChecks, rqtSize = rqtSize, rptSize = rptSize)(p) {
+          override val nPTWPorts = 1
+        })
+      atomAddressMap
+    })
+})
+
+class ListPrefetcherComplete39Config(albSize: Int, atomGranularity: Int, enablePrefetch: Boolean, lookupOnly: Boolean) extends Config((site, here, up) => {
+  case MonitorsEnabled => false
+  case BuildRoCC => Seq(
+    (p: Parameters) => {
+      val atomAddressMap = LazyModule(
+        new ListPrefetcherComplete39(opcodes = OpcodeSet.custom2, albSize = albSize,
+                             atomGranularity = atomGranularity, enablePrefetch = enablePrefetch, lookupOnly = lookupOnly)(p) {
+          override val nPTWPorts = 1
+        })
+      atomAddressMap
+    })
+})
+
+class ListPrefetcherComplete39InitialRqtNoswaitRPTCLOSERTOSLOWConfig(albSize: Int, atomGranularity: Int, enablePrefetch: Boolean, lookupOnly: Boolean, disableRedundancyChecks: Boolean, rptSize: Int) extends Config((site, here, up) => {
+  case MonitorsEnabled => false
+  case BuildRoCC => Seq(
+    (p: Parameters) => {
+      val atomAddressMap = LazyModule(
+        new ListPrefetcherComplete39InitialRqtNoswaitRPTCLOSERTOSLOW(opcodes = OpcodeSet.custom2, albSize = albSize,
+                             atomGranularity = atomGranularity, enablePrefetch = enablePrefetch, lookupOnly = lookupOnly, disableRedundancyChecks = disableRedundancyChecks, rptSize = rptSize)(p) {
+          override val nPTWPorts = 1
+        })
+      atomAddressMap
+    })
+})
+//////////////////////////////////////////////////////
 
 class BaseSubsystemConfig extends Config ((site, here, up) => {
   // Tile parameters
@@ -89,6 +234,40 @@ class WithCoherentBusTopology extends Config((site, here, up) => {
       driveMBusClockFromSBus = site(DriveClocksFromSBus)))
 })
 
+class CorrectWithNMediumCoresNoBwslowdown1Way1DTLBSet1MSHR(
+  n: Int,
+  mshrno: Int = 1,
+  crossing: RocketCrossingParams = RocketCrossingParams()
+) extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => {
+    val prev = up(TilesLocated(InSubsystem), site)
+    val idOffset = up(NumTiles)
+    val small = RocketTileParams(
+      core = RocketCoreParams(),
+      btb = None,
+      dcache = Some(DCacheParams(
+        rowBits = site(SystemBusKey).beatBits,
+        nSets = 64,
+        nWays = 1,
+        nTLBSets = 1,
+        nTLBWays = 4,
+        nMSHRs = mshrno,
+        blockBytes = site(CacheBlockBytes))),
+      icache = Some(ICacheParams(
+        rowBits = site(SystemBusKey).beatBits,
+        nSets = 64,
+        nWays = 4,
+        nTLBSets = 4,
+        nTLBWays = 4,
+        blockBytes = site(CacheBlockBytes))))
+    List.tabulate(n)(i => RocketTileAttachParams(
+      small.copy(tileId = i + idOffset),
+      crossing
+    )) ++ prev
+  }
+  case NumTiles => up(NumTiles) + n
+})
+
 class WithNBigCores(
   n: Int,
   location: HierarchicalLocation,
@@ -104,11 +283,14 @@ class WithNBigCores(
         divEarlyOut = true))),
       dcache = Some(DCacheParams(
         rowBits = site(SystemBusKey).beatBits,
-        nMSHRs = 0,
+        nMSHRs = 4, // SAVVINA changed from MetaSys
         blockBytes = site(CacheBlockBytes))),
       icache = Some(ICacheParams(
         rowBits = site(SystemBusKey).beatBits,
         blockBytes = site(CacheBlockBytes))))
+      
+      //SAVVINA
+      printf("Number of Performance Counters\n")
     List.tabulate(n)(i => RocketTileAttachParams(
       big.copy(tileId = i + idOffset),
       crossing
@@ -126,8 +308,172 @@ class WithNBigCores(
   ))
 }
 
+// SAVVINA added from MetaSys and modified it 
+class CorrectWithNMediumCoresNoBwslowdown(
+  n: Int, 
+  mshrno: Int = 2,
+  crossing: RocketCrossingParams = RocketCrossingParams(),
+) extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => {
+    val prev = up(TilesLocated(InSubsystem), site)
+    val idOffset = up(NumTiles)
+    val medium = RocketTileParams(
+      core = RocketCoreParams(),
+      btb = None,
+      dcache = Some(DCacheParams(
+        rowBits = site(SystemBusKey).beatBytes*8,
+        nSets = 64,
+        nWays = 4,
+        nTLBSets = 4,
+        nTLBWays = 4,
+        nMSHRs = mshrno,
+        blockBytes = site(CacheBlockBytes))),
+      icache = Some(ICacheParams(
+        rowBits = site(SystemBusKey).beatBytes*8,
+        nSets = 64,
+        nWays = 1,
+        nTLBSets = 1,
+        nTLBWays = 4,
+        blockBytes = site(CacheBlockBytes))))
+    List.tabulate(n)(i => RocketTileAttachParams(
+      medium.copy(tileId = i + idOffset),
+      crossing
+    )) ++ prev
+  }
+  case NumTiles => up(NumTiles) + n
+})
 
+/* SAVVINA: added from MetaSys 
+class CorrectWithNMediumCores(n: Int, bwSlowdown: Int = 20, mshrno: Int = 2) extends Config((site, here, up) => {
+  case RocketTilesKey => {
+    val medium = RocketTileParams(
+      core = RocketCoreParams(),
+      btb = None,
+      dcache = Some(DCacheParams(
+        rowBits = site(SystemBusKey).beatBytes*8,
+        nSets = 64,
+        nWays = 4,
+        nTLBEntries = 16,
+        nMSHRs = mshrno,
+        bwSlowdown = bwSlowdown,
+        blockBytes = site(CacheBlockBytes))),
+      icache = Some(ICacheParams(
+        rowBits = site(SystemBusKey).beatBytes*8,
+        nSets = 64,
+        nWays = 1,
+        nTLBEntries = 4,
+        blockBytes = site(CacheBlockBytes))))
+    List.tabulate(n)(i => medium.copy(hartId = i))
+  }
+})
+*/
 
+class CorrectWithNMediumCoresNoBwslowdownFinal(
+  n: Int, 
+  mshrno: Int = 2,
+  crossing: RocketCrossingParams = RocketCrossingParams(),
+) extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => {
+    val prev = up(TilesLocated(InSubsystem), site)
+    val idOffset = up(NumTiles)
+    val medium = RocketTileParams(
+      core = RocketCoreParams(),
+      btb = None,
+      dcache = Some(DCacheParams(
+        rowBits = site(SystemBusKey).beatBits,
+        nSets = 64,
+        nWays = 4,
+        nTLBSets = 4,
+        nTLBWays = 4,
+        nMSHRs = mshrno,
+        blockBytes = site(CacheBlockBytes))),
+      icache = Some(ICacheParams(
+        rowBits = site(SystemBusKey).beatBits,
+        nSets = 64,
+        nWays = 4,
+        nTLBSets = 4,
+        nTLBWays = 4,
+        blockBytes = site(CacheBlockBytes))))
+    List.tabulate(n)(i => RocketTileAttachParams(
+      medium.copy(tileId = i + idOffset),
+      crossing
+    )) ++ prev
+  }
+  case NumTiles => up(NumTiles) + n
+})
+
+class CorrectWithNMediumCoresNoBwslowdownFinal8Way16DTLBSets16MSHR(
+  n: Int, 
+  mshrno: Int = 2,
+  crossing: RocketCrossingParams = RocketCrossingParams(),
+) extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => {
+    val prev = up(TilesLocated(InSubsystem), site)
+    val idOffset = up(NumTiles)
+    val medium = RocketTileParams(
+      core = RocketCoreParams(),
+      btb = None,
+      dcache = Some(DCacheParams(
+        rowBits = site(SystemBusKey).beatBits,
+        nSets = 64,
+        nWays = 8,
+        nTLBSets = 16,
+        nTLBWays = 4,
+        nMSHRs = mshrno,
+        blockBytes = site(CacheBlockBytes))),
+      icache = Some(ICacheParams(
+        rowBits = site(SystemBusKey).beatBits,
+        nSets = 64,
+        nWays = 4,
+        nTLBSets = 4,
+        nTLBWays = 4,
+        blockBytes = site(CacheBlockBytes))))
+    List.tabulate(n)(i => RocketTileAttachParams(
+      medium.copy(tileId = i + idOffset),
+      crossing
+    )) ++ prev
+  }
+  case NumTiles => up(NumTiles) + n
+})
+
+// SAVVINA added from MetaSys and modified it 
+class WithSimNMediumCores(
+  n: Int,
+  crossing: RocketCrossingParams = RocketCrossingParams()
+) extends Config((site, here, up) => {
+  case SystemBusKey => up(SystemBusKey, site).copy(beatBytes = site(XLen)/8*8)
+  case TilesLocated(InSubsystem) => {
+    val prev = up(TilesLocated(InSubsystem), site)
+    val idOffset = up(NumTiles)
+    val medium = RocketTileParams(
+      core = RocketCoreParams(fpu = None),
+      btb = None,
+      dcache = Some(DCacheParams(
+        rowBits = 64*8,
+        nSets = 64,
+        nWays = 1,
+        nTLBSets = 1,
+        nTLBWays = 4,
+        nMSHRs = 4,
+        blockBytes = site(CacheBlockBytes))),
+      icache = Some(ICacheParams(
+        rowBits = site(SystemBusKey).beatBytes*8,
+        nSets = 64,
+        nWays = 1,
+        nTLBSets = 1,
+        nTLBWays = 4,
+        blockBytes = site(CacheBlockBytes))))
+    List.tabulate(n)(i => RocketTileAttachParams(
+      medium.copy(tileId = i + idOffset),
+      crossing
+    )) ++ prev
+  }
+  case NumTiles => up(NumTiles) + n
+})
+
+/*--- SAVVINA COMMENT ---*/
+/*--- Difference from CorrectWithNMediumCoresNoBwslowdown ---*/
+/* Different DCache parameters, worse L1 DCache */
 class WithNMedCores(
   n: Int,
   crossing: RocketCrossingParams = RocketCrossingParams(),
@@ -145,6 +491,75 @@ class WithNMedCores(
         nTLBSets = 1,
         nTLBWays = 4,
         nMSHRs = 0,
+        blockBytes = site(CacheBlockBytes))),
+      icache = Some(ICacheParams(
+        rowBits = site(SystemBusKey).beatBits,
+        nSets = 64,
+        nWays = 1,
+        nTLBSets = 1,
+        nTLBWays = 4,
+        blockBytes = site(CacheBlockBytes))))
+    List.tabulate(n)(i => RocketTileAttachParams(
+      med.copy(tileId = i + idOffset),
+      crossing
+    )) ++ prev
+  }
+  case NumTiles => up(NumTiles) + n
+})
+
+/*--- SAVVINA COMMENT ---*/
+/*--- Difference from WithNMedCores ---*/
+/* Includes FPU, necessary for Linux booting */
+class WithNMedCoresFPU(
+  n: Int,
+  crossing: RocketCrossingParams = RocketCrossingParams(),
+) extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => {
+    val prev = up(TilesLocated(InSubsystem), site)
+    val idOffset = up(NumTiles)
+    val med = RocketTileParams(
+      core = RocketCoreParams(),
+      btb = None,
+      dcache = Some(DCacheParams(
+        rowBits = site(SystemBusKey).beatBits,
+        nSets = 64,
+        nWays = 1,
+        nTLBSets = 1,
+        nTLBWays = 4,
+        nMSHRs = 0,
+        blockBytes = site(CacheBlockBytes))),
+      icache = Some(ICacheParams(
+        rowBits = site(SystemBusKey).beatBits,
+        nSets = 64,
+        nWays = 1,
+        nTLBSets = 1,
+        nTLBWays = 4,
+        blockBytes = site(CacheBlockBytes))))
+    List.tabulate(n)(i => RocketTileAttachParams(
+      med.copy(tileId = i + idOffset),
+      crossing
+    )) ++ prev
+  }
+  case NumTiles => up(NumTiles) + n
+})
+
+class WithNMedCoresFPU1nMSHRs(
+  n: Int,
+  crossing: RocketCrossingParams = RocketCrossingParams(),
+) extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => {
+    val prev = up(TilesLocated(InSubsystem), site)
+    val idOffset = up(NumTiles)
+    val med = RocketTileParams(
+      core = RocketCoreParams(),
+      btb = None,
+      dcache = Some(DCacheParams(
+        rowBits = site(SystemBusKey).beatBits,
+        nSets = 64,
+        nWays = 1,
+        nTLBSets = 1,
+        nTLBWays = 4,
+        nMSHRs = 1,
         blockBytes = site(CacheBlockBytes))),
       icache = Some(ICacheParams(
         rowBits = site(SystemBusKey).beatBits,
@@ -209,7 +624,7 @@ class With1TinyCore extends Config((site, here, up) => {
         nWays = 1,
         nTLBSets = 1,
         nTLBWays = 4,
-        nMSHRs = 0,
+        nMSHRs = 1, // SAVVINA changed from MetaSys
         blockBytes = site(CacheBlockBytes),
         scratch = Some(0x80000000L))),
       icache = Some(ICacheParams(
@@ -386,7 +801,7 @@ class WithHypervisor(hext: Boolean = true) extends Config((site, here, up) => {
   }
 })
 
-class WithRoccExample extends Config((site, here, up) => {
+class WithRoccExampleDefault extends Config((site, here, up) => {
   case BuildRoCC => List(
     (p: Parameters) => {
         val accumulator = LazyModule(new AccumulatorExample(OpcodeSet.custom0, n = 4)(p))

@@ -217,7 +217,8 @@ object CSR
 class PerfCounterIO(implicit p: Parameters) extends CoreBundle
     with HasCoreParameters {
   val eventSel = Output(UInt(xLen.W))
-  val inc = Input(UInt(log2Ceil(1+retireWidth).W))
+  //val inc = Input(UInt(log2Ceil(1+retireWidth).W))
+  val inc = Input(UInt(4.W)) // SAVVINA changed from MetaSys
 }
 
 class TracedInstruction(implicit p: Parameters) extends CoreBundle {
@@ -1281,12 +1282,24 @@ class CSRFile(
 
     for (((e, c), i) <- (reg_hpmevent zip reg_hpmcounter).zipWithIndex) {
       writeCounter(i + CSR.firstMHPC, c, wdata)
-      when (decoded_addr(i + CSR.firstHPE)) { e := perfEventSets.maskEventSelector(wdata) }
+      when (decoded_addr(i + CSR.firstHPE)) { e := perfEventSets.maskEventSelector(wdata) 
+      printf(p"Performance Counter $i: Event = ${Hexadecimal(e)}, Counter = ${Hexadecimal(c)}\n")
+      }
+
+      // SAVVINA Print performance counter values
+      // printf(p"Performance Counter $i: Event = ${Hexadecimal(e)}, Counter = ${Hexadecimal(c)}\n")
     }
+
     if (coreParams.haveBasicCounters) {
       when (decoded_addr(CSRs.mcountinhibit)) { reg_mcountinhibit := wdata & ~2.U(xLen.W) }  // mcountinhibit bit [1] is tied zero
       writeCounter(CSRs.mcycle, reg_cycle, wdata)
+      
+      // SAVVINA Print mcycle
+      printf(p"Cycle Counter (mcycle) = ${Hexadecimal(reg_cycle)}\n")
+
       writeCounter(CSRs.minstret, reg_instret, wdata)
+
+      printf(p"Retired Instructions Counter (minstret) = ${Hexadecimal(reg_instret)}\n")
     }
 
     if (usingFPU) {
@@ -1297,6 +1310,8 @@ class CSRFile(
         reg_fflags := wdata
         reg_frm := wdata >> reg_fflags.getWidth
       }
+
+      println("Using FPU") //SAVVINA added from MetaSys
     }
     if (usingDebug) {
       when (decoded_addr(CSRs.dcsr)) {

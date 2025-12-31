@@ -1,0 +1,5 @@
+make: Entering directory '/home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/microbenchmarks/Protec'
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O2 -finline-small-functions -I../../util  -I../../XMemLib -c demo.cpp -o demo_noatom.o
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O2 -finline-small-functions -I../../util  -I../../XMemLib -c ../../util/HPC.cpp -o hpc_noatom.o
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O2 -finline-small-functions -I../../util  -I../../XMemLib demo_noatom.o hpc_noatom.o -L../../XMemLib -lXMemLib -o demo_noatom.riscv
+make: Leaving directory '/home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/microbenchmarks/Protec'

@@ -1,0 +1,23 @@
+bbl loader
+PROG START
+In ATOM_INIT: Loaded AMU table
+INIT ATOM TABLE
+Read graph /home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/benchmarks/input_graph.txt
+Rows = 5 Non-zero = 7 
+BEGIN TEST
+ENDED ATOM RELATED STUFF
+Running triangle counting 
+END TEST
+cycles: 9928
+instructions: 6079
+accelerator misses: 0
+total misses: 0
+alb requests: 0
+alb hits: 0
+dtlb misses: 0
+alb misses: 0
+n/a: 0
+n/a: 0
+9928,6079,0,0,0,0,0,0,0,0
+[UART] UART0 is here (stdin/stdout).
+- /home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.PrefetcherRocketConfigWithFPUPerfCount/gen-collateral/TestDriver.v:158: Verilog $finish

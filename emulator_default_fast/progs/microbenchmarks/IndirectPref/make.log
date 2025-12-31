@@ -1,0 +1,12 @@
+make: Entering directory '/home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/microbenchmarks/IndirectPref'
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O3 -I../../util  -I../../XMemLib -c ind_pref_microbenchmark.cpp -o ind_pref_microbenchmark.o
+ind_pref_microbenchmark.cpp: In function 'int main()':
+ind_pref_microbenchmark.cpp:21:33: warning: 'used' attribute ignored [-Wattributes]
+   21 | uint32_t* a __attribute__((used)) = (uint32_t*) malloc(sizeof(uint32_t)*100);
+      |                                 ^
+ind_pref_microbenchmark.cpp:22:33: warning: 'used' attribute ignored [-Wattributes]
+   22 | uint32_t* b __attribute__((used)) = (uint32_t*) malloc(sizeof(uint32_t)*100);
+      |                                 ^
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O3 -I../../util  -I../../XMemLib -c ../../util/HPC.cpp -o hpc.o
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O3 -I../../util  -I../../XMemLib ind_pref_microbenchmark.o hpc.o -L../../XMemLib -lXMemLib -o ind_pref_microbenchmark.riscv
+make: Leaving directory '/home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/microbenchmarks/IndirectPref'

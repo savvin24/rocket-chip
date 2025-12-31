@@ -20,10 +20,12 @@ case class RocketTileParams(
     core: RocketCoreParams = RocketCoreParams(),
     icache: Option[ICacheParams] = Some(ICacheParams()),
     dcache: Option[DCacheParams] = Some(DCacheParams()),
+    //rocc: Seq[RoCCParams] = Nil, //SAVVINA: Added for MetaSys, should be maybe removed in the future
     btb: Option[BTBParams] = Some(BTBParams()),
     dataScratchpadBytes: Int = 0,
     tileId: Int = 0,
     beuAddr: Option[BigInt] = None,
+    //hartId: Int = 0, //SAVVINA: Added for MetaSys, should be maybe removed in the future
     blockerCtrlAddr: Option[BigInt] = None,
     clockSinkParams: ClockSinkParameters = ClockSinkParameters(),
     boundaryBuffers: Option[RocketTileBoundaryBufferParams] = None
@@ -52,6 +54,23 @@ class RocketTile private(
   // Private constructor ensures altered LazyModule.p is used implicitly
   def this(params: RocketTileParams, crossing: HierarchicalElementCrossingParamsLike, lookup: LookupByHartIdImpl)(implicit p: Parameters) =
     this(params, crossing.crossingType, lookup, p)
+
+// /*SAVVINA START*/
+//   val firstRoCCOption = roccs.headOption
+
+//   firstRoCCOption match {
+//     case Some(firstRoCC) => 
+//       val firstRoCC = roccs.head
+//       firstRoCC.module.io.mem_pref <> DontCare
+//       firstRoCC.module.io.mem_amulookup <> DontCare
+//       firstRoCC.module.io.core_snoop <> DontCare
+//       firstRoCC.module.io.ptw_snoop <> DontCare
+//     case None =>
+//       // Handle the case where there are no RoCCs in the sequence
+
+//       printf("Savvina: Error: No RoCCs in the sequence\n")
+//   }
+// /*SAVVINA END*/
 
   val intOutwardNode = rocketParams.beuAddr map { _ => IntIdentityNode() }
   val slaveNode = TLIdentityNode()
@@ -162,7 +181,26 @@ class RocketTileModuleImp(outer: RocketTile) extends BaseTileModuleImp(outer)
 
   // Connect the core pipeline to other intra-tile modules
   outer.frontend.module.io.cpu <> core.io.imem
+
+  println("Before adding core<->dmem" + dcachePorts.size) // SAVVINA added from MetaSys
+
   dcachePorts += core.io.dmem // TODO outer.dcachePorts += () => module.core.io.dmem ??
+
+ /* SAVVINA added from MetaSys */
+
+  // Toying with ports to prioritize core over prefetcher
+  // require(dcachePorts.size == 5)
+  // val prefetcherPort = dcachePorts(2)
+  // dcachePorts(2) = dcachePorts(4)
+  // dcachePorts(4) = prefetcherPort
+
+/*
+  // SWAP LOOKUP AND CORE PORT ORDERING
+  val lookupPort = dcachePorts(3)
+  dcachePorts(3) = dcachePorts(2)
+  dcachePorts(2) = lookupPort
+*/
+
   fpuOpt foreach { fpu =>
     core.io.fpu :<>= fpu.io.waiveAs[FPUCoreIO](_.cp_req, _.cp_resp)
     fpu.io.cp_req := DontCare
@@ -175,18 +213,67 @@ class RocketTileModuleImp(outer: RocketTile) extends BaseTileModuleImp(outer)
 
   // Connect the coprocessor interfaces
   if (outer.roccs.size > 0) {
-    cmdRouter.get.io.in <> core.io.rocc.cmd
+    cmdRouter.get.io.in <> core.io.rocc.cmd 
+    // core.io.rocc.cmd carries each RoCC command packet that the core destines for the RoCCs
+    // cmdRouter fans out each of these RoCC command packets to the appropriate RoCC, so that 1 accelerator “wins” the command channel each cycle (must verify this by checking the code)
+
     outer.roccs.foreach{ lm =>
       lm.module.io.exception := core.io.rocc.exception
       lm.module.io.fpu_req.ready := DontCare
       lm.module.io.fpu_resp.valid := DontCare
       lm.module.io.fpu_resp.bits.data := DontCare
       lm.module.io.fpu_resp.bits.exc := DontCare
+
+      /* SAVVINA added because "not fully initialised error" (didn't exist in MetaSys) */
+
+      lm.module.io.core_snoop.valid      := core.io.rocc.core_snoop.valid
+      lm.module.io.core_snoop.addr       := core.io.rocc.core_snoop.addr
+      lm.module.io.core_snoop.cmd        := core.io.rocc.core_snoop.cmd
+      lm.module.io.core_snoop.size       := core.io.rocc.core_snoop.size
+      lm.module.io.core_snoop.s1_kill    := core.io.rocc.core_snoop.s1_kill
+      lm.module.io.core_snoop.s2_paddr   := core.io.rocc.core_snoop.s2_paddr
+      lm.module.io.core_snoop.s2_xcpt    := core.io.rocc.core_snoop.s2_xcpt
+      lm.module.io.core_snoop.s2_nack    := core.io.rocc.core_snoop.s2_nack
+      lm.module.io.core_snoop.miss       := core.io.rocc.core_snoop.miss
+      lm.module.io.core_snoop.physical   := core.io.rocc.core_snoop.physical
+
+      lm.module.io.core_snoop.bp_q_full := DontCare
+      lm.module.io.core_snoop.bc_resolved := DontCare
+      lm.module.io.core_snoop.dbg1 := DontCare
+      lm.module.io.core_snoop.dbg2 := DontCare
+      lm.module.io.core_snoop.dbg3 := DontCare
+      lm.module.io.core_snoop.dbg4 := DontCare
+
+      /*SAVVINA START*/
+
+      // lm.module.io.mem_amulookup <> core.io.rocc.mem_amulookup
+      // lm.module.io.core_snoop <> core.io.rocc.core_snoop
+      //lm.module.io.ptw_snoop <> core.io.rocc.ptw_snoop
+      //ptw.io.snoop //In old metasys: LazyRoCC.scala:169
+      /*SAVVINA END*/
     }
-    core.io.rocc.resp <> respArb.get.io.out
-    core.io.rocc.busy <> (cmdRouter.get.io.busy || outer.roccs.map(_.module.io.busy).reduce(_ || _))
+    core.io.rocc.resp <> respArb.get.io.out  // respArb.get.io.out: Accelerators generate RoCC responses (e.g. result tokens) via respArb, which merges the outputs of all accelerators onto a single response channel
+    // core.io.rocc.resp is the port that the core uses to receive RoCC responses
+    core.io.rocc.busy <> (cmdRouter.get.io.busy || outer.roccs.map(_.module.io.busy).reduce(_ || _)) // either the cmdRouter is busy or at least one of the RoCCs is busy
     core.io.rocc.interrupt := outer.roccs.map(_.module.io.interrupt).reduce(_ || _)
     (core.io.rocc.csrs zip roccCSRIOs.flatten).foreach { t => t._2 <> t._1 }
+
+    // core.io.rocc.core_snoop.bp_q_full := DontCare // SAVVINA added because "not fully initialised error" (didn't exist in MetaSys)
+    // core.io.rocc.core_snoop.bc_resolved := DontCare // SAVVINA added because "not fully initialised error" (didn't exist in MetaSys)
+    // core.io.rocc.core_snoop.dbg1 := DontCare // SAVVINA added because "not fully initialised error" (didn't exist in MetaSys)
+    // core.io.rocc.core_snoop.dbg2 := DontCare // SAVVINA added because "not fully initialised error" (didn't exist in MetaSys)
+    // core.io.rocc.core_snoop.dbg3 := DontCare // SAVVINA added because "not fully initialised error" (didn't exist in MetaSys)
+    // core.io.rocc.core_snoop.dbg4 := DontCare // SAVVINA added because "not fully initialised error" (didn't exist in MetaSys)
+    
+    // core.io.rocc.ptw_snoop.bp_q_full := DontCare // SAVVINA added because "not fully initialised error" (didn't exist in MetaSys)
+    // core.io.rocc.ptw_snoop.bc_resolved := DontCare // SAVVINA added because "not fully initialised error" (didn't exist in MetaSys)
+    // core.io.rocc.ptw_snoop.dbg1 := DontCare // SAVVINA added because "not fully initialised error" (didn't exist in MetaSys)
+    // core.io.rocc.ptw_snoop.dbg2 := DontCare // SAVVINA added because "not fully initialised error" (didn't exist in MetaSys) 
+    // core.io.rocc.ptw_snoop.dbg3 := DontCare // SAVVINA added because "not fully initialised error" (didn't exist in MetaSys)
+    // core.io.rocc.ptw_snoop.dbg4 := DontCare // SAVVINA added because "not fully initialised error" (didn't exist in MetaSys)
+
+    
+
   } else {
     // tie off
     core.io.rocc.cmd.ready := false.B
@@ -197,6 +284,26 @@ class RocketTileModuleImp(outer: RocketTile) extends BaseTileModuleImp(outer)
   }
   // Dont care mem since not all RoCC need accessing memory
   core.io.rocc.mem := DontCare
+  core.io.rocc.mem_pref := DontCare // SAVVINA added because "not fully initialised error" (didn't exist in MetaSys) 
+  core.io.rocc.mem_amulookup := DontCare // SAVVINA added because "not fully initialised error" (didn't exist in MetaSys) 
+  // core.io.rocc.mem_pref := DontCare
+  // core.io.rocc.mem_amulookup := DontCare
+  // core.io.rocc.core_snoop := DontCare
+  //core.io.rocc.ptw_snoop := ptw.io.snoop
+
+    core.io.rocc.core_snoop.bp_q_full := DontCare // SAVVINA added because "not fully initialised error" (didn't exist in MetaSys)
+    core.io.rocc.core_snoop.bc_resolved := DontCare // SAVVINA added because "not fully initialised error" (didn't exist in MetaSys)
+    core.io.rocc.core_snoop.dbg1 := DontCare // SAVVINA added because "not fully initialised error" (didn't exist in MetaSys)
+    core.io.rocc.core_snoop.dbg2 := DontCare // SAVVINA added because "not fully initialised error" (didn't exist in MetaSys)
+    core.io.rocc.core_snoop.dbg3 := DontCare // SAVVINA added because "not fully initialised error" (didn't exist in MetaSys)
+    core.io.rocc.core_snoop.dbg4 := DontCare // SAVVINA added because "not fully initialised error" (didn't exist in MetaSys)
+    
+    core.io.rocc.ptw_snoop.bp_q_full := DontCare // SAVVINA added because "not fully initialised error" (didn't exist in MetaSys)
+    core.io.rocc.ptw_snoop.bc_resolved := DontCare // SAVVINA added because "not fully initialised error" (didn't exist in MetaSys)
+    core.io.rocc.ptw_snoop.dbg1 := DontCare // SAVVINA added because "not fully initialised error" (didn't exist in MetaSys)
+    core.io.rocc.ptw_snoop.dbg2 := DontCare // SAVVINA added because "not fully initialised error" (didn't exist in MetaSys) 
+    core.io.rocc.ptw_snoop.dbg3 := DontCare // SAVVINA added because "not fully initialised error" (didn't exist in MetaSys)
+    core.io.rocc.ptw_snoop.dbg4 := DontCare // SAVVINA added because "not fully initialised error" (didn't exist in MetaSys)
 
   // Rocket has higher priority to DTIM than other TileLink clients
   outer.dtim_adapter.foreach { lm => dcachePorts += lm.module.io.dmem }

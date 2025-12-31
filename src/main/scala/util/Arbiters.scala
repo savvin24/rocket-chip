@@ -107,9 +107,23 @@ class InOrderArbiter[T <: Data, U <: Data](reqTyp: T, respTyp: U, n: Int)
   })
 
   if (n > 1) {
+
+    /* SAVVINA COMMENT: 
+    route_q: FIFO queue that saves the index of the (in this case two) recent requestors. 
+    Used to retrieve the requestor index when a response arrives, in order to forward it to the correct requestor*/
+
     val route_q = Module(new Queue(UInt(log2Up(n).W), 2))
+
+    /* SAVVINA COMMENT:
+      req_arb: Round-robin arbiter that selects one of the requestors to forward its request to the out_req to be served.
+    */
+
     val req_arb = Module(new RRArbiter(reqTyp, n))
     req_arb.io.in <> io.in_req
+
+  /* SAVVINA COMMENT:
+    req_helper: A chisel utility that ensures that a transaction is fired only when all its inputs are ready/valid.
+  */
 
     val req_helper = DecoupledHelper(
       req_arb.io.out.valid,
@@ -117,12 +131,15 @@ class InOrderArbiter[T <: Data, U <: Data](reqTyp: T, respTyp: U, n: Int)
       io.out_req.ready)
 
     io.out_req.bits := req_arb.io.out.bits
-    io.out_req.valid := req_helper.fire(io.out_req.ready)
+    //io.out_req.valid := req_helper.fire(io.out_req.ready)
+    io.out_req.valid := req_helper.fire()
 
     route_q.io.enq.bits := req_arb.io.chosen
-    route_q.io.enq.valid := req_helper.fire(route_q.io.enq.ready)
+    //route_q.io.enq.valid := req_helper.fire(route_q.io.enq.ready)
+    route_q.io.enq.valid := req_helper.fire()
 
-    req_arb.io.out.ready := req_helper.fire(req_arb.io.out.valid)
+    //req_arb.io.out.ready := req_helper.fire(req_arb.io.out.valid)
+    req_arb.io.out.ready := req_helper.fire()
 
     val resp_sel = route_q.io.deq.bits
     val resp_ready = io.in_resp(resp_sel).ready
@@ -131,16 +148,92 @@ class InOrderArbiter[T <: Data, U <: Data](reqTyp: T, respTyp: U, n: Int)
       route_q.io.deq.valid,
       io.out_resp.valid)
 
-    val resp_valid = resp_helper.fire(resp_ready)
+    /* SAVVINA COMMENT:
+      send the response to all requestors, but only the one that matches the selected index will receive it.
+    */
+
+    //val resp_valid = resp_helper.fire(resp_ready)
+    val resp_valid = resp_helper.fire()
     for (i <- 0 until n) {
       io.in_resp(i).bits := io.out_resp.bits
       io.in_resp(i).valid := resp_valid && resp_sel === i.U
     }
 
-    route_q.io.deq.ready := resp_helper.fire(route_q.io.deq.valid)
-    io.out_resp.ready := resp_helper.fire(io.out_resp.valid)
+    //route_q.io.deq.ready := resp_helper.fire(route_q.io.deq.valid)
+    //io.out_resp.ready := resp_helper.fire(io.out_resp.valid)
+    route_q.io.deq.ready := resp_helper.fire()
+    io.out_resp.ready := resp_helper.fire()
   } else {
     io.out_req <> io.in_req.head
     io.in_resp.head <> io.out_resp
   }
 }
+
+
+// // SAVVINA ARBITER FOR METASYS (based on InOrderArbiter))
+
+// /**
+//  * An arbiter for AMU lookup requests, which also routes responses back to the original requestor.
+//  * This is based on the principles of the provided InOrderArbiter.
+//  */
+// class AMULookUpArbiter(n: Int)(implicit p: Parameters) extends Module {
+//   val io = IO(new Bundle {
+//     val in = Vec(n, new AMULookUpIO)
+//     val out = Flipped(new AMULookUpIO)
+//   })
+
+// if (n > 1) {
+//     // The queue to track which client's request is outstanding
+//     val route_q = Module(new Queue(UInt(log2Up(n).W), 2))
+
+//     // The request arbitration
+//     val req_arb = Module(new RRArbiter(new AMULookUpReq, n))
+//     for (i <- 0 until n) {
+//       req_arb.io.in(i).valid := io.in(i).req.valid
+//       req_arb.io.in(i).bits := io.in(i).req.paddr
+//       io.in(i).req.ready := req_arb.io.in(i).ready
+//     }
+
+//     // Ready signal for the output response is controlled by the selected input's response ready
+//     // This is a bit tricky with `AMULookUpIO` because the `ready` is an output.
+//     // We can't directly connect it. Instead, the `valid` on the `in` interfaces are set by us.
+//     // The `ready` on the `out` side drives the `valid` on the in side. Let's simplify this.
+//     // The original `InOrderArbiter` has the same issue. Let's use `DecoupledHelper` to tie it together.
+
+//     val req_helper = DecoupledHelper(
+//       req_arb.io.out.valid,
+//       route_q.io.enq.ready,
+//       io.out.req.ready)
+
+//     io.out.req.paddr := req_arb.io.out.bits.paddr
+//     io.out.req.valid := req_helper.fire(io.out.req.ready)
+
+//     route_q.io.enq.bits := req_arb.io.chosen
+//     route_q.io.enq.valid := req_helper.fire(route_q.io.enq.ready)
+
+//     req_arb.io.out.ready := req_helper.fire(req_arb.io.out.valid)
+    
+//     // The response routing
+//     val resp_sel = route_q.io.deq.bits
+
+//     // Now for the response
+//     val resp_helper = DecoupledHelper(
+//       route_q.io.deq.valid,
+//       io.out.resp.valid)
+
+//     // Route the response from the output back to the correct input client
+//     for (i <- 0 until n) {
+//       io.in(i).resp.valid := Mux(resp_sel === i.U, io.out.resp.valid, false.B)
+//       io.in(i).resp.miss := io.out.resp.miss
+//       io.in(i).resp.atom_id := io.out.resp.atom_id
+//       io.in(i).resp.xcpt := io.out.resp.xcpt
+//     }
+
+//     route_q.io.deq.ready := resp_helper.fire(route_q.io.deq.valid)
+
+//   } else {
+//     // If there's only one client, we can directly connect the request and response
+//     io.out.req <> io.in(0).req
+//     io.in(0).resp <> io.out.resp
+//   }
+// }

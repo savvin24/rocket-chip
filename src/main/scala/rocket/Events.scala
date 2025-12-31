@@ -9,6 +9,12 @@ import freechips.rocketchip.util._
 import freechips.rocketchip.util.property
 
 class EventSet(val gate: (UInt, UInt) => Bool, val events: Seq[(String, () => Bool)]) {
+  
+// In MetaSys it is modified as below:
+//class EventSet(val gate: (UInt, UInt) => Bool, val events: Seq[(String, () => UInt)]) { 
+// but I get an error from this modification when compiling and I don't see the point since nothing else is changed except for that,
+// so I haven't passed the change
+
   def size = events.size
   val hits = WireDefault(VecInit(Seq.fill(size)(false.B)))
   def check(mask: UInt) = {

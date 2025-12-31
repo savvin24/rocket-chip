@@ -25,6 +25,7 @@ class PTWReq(implicit p: Parameters) extends CoreBundle()(p) {
   val need_gpa = Bool()
   val vstage1 = Bool()
   val stage2 = Bool()
+  // val isLookup = Bool() // SAVVINA METASYS
 }
 
 /** PTE info from L2TLB to TLB
@@ -226,6 +227,7 @@ class PTW(n: Int)(implicit edge: TLEdgeOut, p: Parameters) extends CoreModule()(
       *
       * contains CSRs info and performance statistics
       */
+    val snoop = new CoreASPIO //SAVVINA added from METASYS
     val dpath = new DatapathPTWIO
   })
 
@@ -533,15 +535,38 @@ class PTW(n: Int)(implicit edge: TLEdgeOut, p: Parameters) extends CoreModule()(
   io.mem.req.bits.idx.foreach(_ := pte_addr)
   io.mem.req.bits.dprv := PRV.S.U   // PTW accesses are S-mode by definition
   io.mem.req.bits.dv := do_both_stages && !stage2
+  // io.mem.req.bits.isLookup := false.B // SAVVINA added (not existing in original metasys) cause compiler complains about it not being initialised
   io.mem.req.bits.tag := DontCare
   io.mem.req.bits.no_alloc := DontCare
   io.mem.req.bits.no_xcpt := DontCare
   io.mem.req.bits.data := DontCare
   io.mem.req.bits.mask := DontCare
+  // io.mem.req.bits.paddr := DontCare //SAVVINA not in original metasys, added it myself
 
   io.mem.s1_kill := l2_hit || state =/= s_wait1
   io.mem.s1_data := DontCare
   io.mem.s2_kill := false.B
+
+//SAVVINA METASYS start
+  // io.snoop.valid := state === s_req && !l2_error && !r_req.isLookup //&& !io.snoop.bp_q_full //SAVVINA change l2_error is l2_valid in original metasys
+  io.snoop.valid := state === s_req && !l2_error
+  io.snoop.addr := pte_addr
+  io.snoop.cmd  := M_XRD
+  io.snoop.size  := log2Ceil(xLen/8).U
+  io.snoop.s2_paddr := pte_addr //SAVVINA not in original metasys, added it myself (pte_addr because physical == true))
+  io.snoop.s1_kill := l2_hit || state =/= s_wait1 //SAVVINA changed it from original metasys
+  io.snoop.s2_nack := io.mem.s2_nack
+  io.snoop.s2_xcpt := io.mem.s2_xcpt
+  io.snoop.physical := true.B
+  io.snoop.miss := !io.mem.resp.valid //SAVVINA not in original metasys, added it myself (inspired by corresponding line in RocketCore.scala)
+
+  // when(state === s_req && !l2_error && !io.snoop.bp_q_full && r_req.isLookup){
+  //   printf("As the page table walker of this device I ignored a request because it was originated by an atom lookup\n")
+  // }
+
+
+//SAVVINA METASYS end
+
 
   val pageGranularityPMPs = pmpGranularity >= (1 << pgIdxBits)
   require(!usingHypervisor || pageGranularityPMPs, s"hypervisor requires pmpGranularity >= ${1<<pgIdxBits}")
@@ -804,6 +829,12 @@ trait CanHavePTWModule extends HasHellaCacheModule {
   val ptwPorts = ListBuffer(outer.dcache.module.io.ptw)
   val ptw = Module(new PTW(outer.nPTWPorts)(outer.dcache.node.edges.out(0), outer.p))
   ptw.io.mem <> DontCare
+  ptw.io.snoop.bp_q_full := DontCare // SAVVINA added to be able to compile core without rocc attached
+  ptw.io.snoop.bc_resolved := DontCare // SAVVINA added to be able to compile core without rocc attached
+  ptw.io.snoop.dbg1 := DontCare // SAVVINA added to be able to compile core without rocc attached
+  ptw.io.snoop.dbg2 := DontCare // SAVVINA added to be able to compile core without rocc attached
+  ptw.io.snoop.dbg3 := DontCare // SAVVINA added to be able to compile core without rocc attached
+  ptw.io.snoop.dbg4 := DontCare // SAVVINA added to be able to compile core without rocc attached
   if (outer.usingPTW) {
     dcachePorts += ptw.io.mem
   }

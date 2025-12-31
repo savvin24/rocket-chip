@@ -1,0 +1,88 @@
+TARGET = riscv64-unknown-elf
+
+CXX := /home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++
+CLINUXXX := /home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-linux-gnu-g++
+GCC = $(TARGET)-gcc
+
+#################################
+# Flags
+#################################
+
+# SoC Settings
+ARCH = rv64imafdc
+ABI = lp64d
+ARCHFLAGS = -march=$(ARCH) -mabi=$(ABI)
+
+
+CFLAGS = -std=c++11 -O0 -fno-common -fno-builtin-printf -DNOATOM
+CFLAGS += $(ARCHFLAGS)
+LDFLAGS = -static
+
+include ../../libgloss.mk
+
+CFLAGSZCU = -static -std=c++11 -O0 -DNOATOM
+
+CFLAGSATOM = -std=c++11 -O0 
+CFLAGSZCUATOM = -static -std=c++11 -O0 
+
+INCLUDES = -I../../util  -I../../XMemLib
+LFLAGS = -L../../XMemLib
+LIBS = -lXMemLib
+
+SRCS = dct.cpp
+HPC_SRC = ../../util/HPC.cpp
+
+TARGET_RISCV = $(SRCS:.cpp=.riscv)
+TARGET_ZCU_RISCV = $(SRCS:.cpp=_zcu.riscv)
+
+TARGET_ATOM_RISCV = $(SRCS:.cpp=_atom.riscv)
+TARGET_ZCU_ATOM_RISCV = $(SRCS:.cpp=_zcu_atom.riscv)
+
+.PHONY: all clean depend
+
+#all: $(TARGET_RISCV) $(TARGET_ZCU_RISCV) $(TARGET_ATOM_RISCV) $(TARGET_ZCU_ATOM_RISCV)
+
+all: $(TARGET_RISCV) 
+
+$(TARGET_RISCV): $(SRCS:.cpp=.o) hpc.o $(libgloss)
+	$(CXX) $(LDFLAGS) $(INCLUDES) $< $(LFLAGS) $(LIBS) -o $@
+
+$(TARGET_ZCU_RISCV): $(SRCS:.cpp=_zcu.o) hpc_zcu.o
+	$(CLINUXXX) $(CFLAGSZCU) $(INCLUDES) $(SRCS:.cpp=_zcu.o) hpc_zcu.o $(LFLAGS) $(LIBS) -o $@
+
+$(TARGET_ATOM_RISCV): $(SRCS:.cpp=_atom.o) hpc_atom.o
+	$(CXX) $(CFLAGSATOM) $(INCLUDES) $(SRCS:.cpp=_atom.o) hpc_atom.o $(LFLAGS) $(LIBS) -o $@
+
+$(TARGET_ZCU_ATOM_RISCV): $(SRCS:.cpp=_zcu_atom.o) hpc_zcu_atom.o
+	$(CLINUXXX) $(CFLAGSZCUATOM) $(INCLUDES) $(SRCS:.cpp=_zcu_atom.o) hpc_zcu_atom.o $(LFLAGS) $(LIBS) -o $@
+
+$(SRCS:.cpp=.o): $(SRCS)
+	$(CXX) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+$(SRCS:.cpp=_zcu.o): $(SRCS)
+	$(CLINUXXX) $(CFLAGSZCU) $(INCLUDES) -c $< -o $@
+
+$(SRCS:.cpp=_atom.o): $(SRCS)
+	$(CXX) $(CFLAGSATOM) $(INCLUDES) -c $< -o $@
+
+$(SRCS:.cpp=_zcu_atom.o): $(SRCS)
+	$(CLINUXXX) $(CFLAGSZCUATOM) $(INCLUDES) -c $< -o $@
+
+hpc.o: $(HPC_SRC)
+	$(CXX) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+hpc_zcu.o: $(HPC_SRC)
+	$(CLINUXXX) $(CFLAGSZCU) $(INCLUDES) -c $< -o $@
+
+hpc_atom.o: $(HPC_SRC)
+	$(CXX) $(CFLAGSATOM) $(INCLUDES) -c $< -o $@
+
+hpc_zcu_atom.o: $(HPC_SRC)
+	$(CLINUXXX) $(CFLAGSZCUATOM) $(INCLUDES) -c $< -o $@
+
+clean:
+	$(RM) *.o $(TARGET_RISCV) $(TARGET_ZCU_RISCV) $(TARGET_ATOM_RISCV) $(TARGET_ZCU_ATOM_RISCV) *~
+	$(if $(libgloss),rm -rf $(libgloss_builddir)/)
+
+depend: $(SRCS) $(HPC_SRC)
+	makedepend $(INCLUDES) $^

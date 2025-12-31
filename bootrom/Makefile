@@ -4,6 +4,7 @@ GCC=riscv64-unknown-elf-gcc
 OBJCOPY=riscv64-unknown-elf-objcopy
 
 all: $(bootrom_img)
+elf: bootrom.elf
 
 %.img: %.bin
 	dd if=$< of=$@ bs=128 count=1

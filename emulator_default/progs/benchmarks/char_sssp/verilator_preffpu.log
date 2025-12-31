@@ -1,0 +1,30 @@
+bbl loader
+In ATOM_INIT: Loaded AMU table
+In ATOM_INIT: Returned from amu_write_acr
+Read graph /home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/benchmarks/input_graph.txt
+Rows = 5 Non-zero = 7 
+ROI START 
+IN ATOM_DEACTIVATE: Returned from ast_deactivate
+IN ATOM_ACTIVATE: Returned from ast_activate
+IN ATOM_ACTIVATE: Returned from ast_activate
+IN ATOM_ACTIVATE: Returned from ast_activate
+IN ATOM_MAP: Returned from amu_write_len
+IN ATOM_MAP: Returned from amu_map
+IN ATOM_MAP: Returned from amu_write_len
+IN ATOM_MAP: Returned from amu_map
+IN ATOM_MAP: Returned from amu_write_len
+IN ATOM_MAP: Returned from amu_map
+ROI END
+cycles: 64954
+instructions: 46436
+accelerator misses: 0
+total misses: 0
+alb requests: 0
+alb hits: 0
+dtlb misses: 0
+alb misses: 0
+n/a: 0
+n/a: 0
+64954,46436,0,0,0,0,0,0,0,0
+[UART] UART0 is here (stdin/stdout).
+- /home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.PrefetcherRocketConfigWithFPUPerfCount/gen-collateral/TestDriver.v:158: Verilog $finish

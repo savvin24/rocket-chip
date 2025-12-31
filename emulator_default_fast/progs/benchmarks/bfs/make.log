@@ -1,0 +1,8 @@
+make: Entering directory '/home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/benchmarks/bfs'
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O3 -DNOATOM -I../../util  -I../../XMemLib -c bfs.cpp -o bfs_noatom.o
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O3 -DNOATOM -I../../util  -I../../XMemLib -c ../../util/HPC.cpp -o hpc_noatom.o
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O3 -DNOATOM -I../../util  -I../../XMemLib bfs_noatom.o hpc_noatom.o -L../../XMemLib -lXMemLib -o bfs_noatom.riscv
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O3  -I../../util  -I../../XMemLib -c bfs.cpp -o bfs.o
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O3  -I../../util  -I../../XMemLib -c ../../util/HPC.cpp -o hpc.o
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O3  -I../../util  -I../../XMemLib bfs.o hpc.o -L../../XMemLib -lXMemLib -o bfs.riscv
+make: Leaving directory '/home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/benchmarks/bfs'

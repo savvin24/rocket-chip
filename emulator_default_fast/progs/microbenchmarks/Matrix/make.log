@@ -1,0 +1,6 @@
+make: Entering directory '/home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/microbenchmarks/Matrix'
+/home/riscv/Documents/Chipyard/SavvinaThesis/riscv-gnu-toolchain/installed-tools/bin/riscv64-unknown-elf-g++ -std=c++11 -O3 DNOATOM -I../../util  -I../../XMemLib -c Matrix.cpp -o Matrix_noatom.o
+riscv64-unknown-elf-g++: warning: DNOATOM: linker input file unused because linking not done
+riscv64-unknown-elf-g++: error: DNOATOM: linker input file not found: No such file or directory
+make: *** [Makefile:29: Matrix_noatom.o] Error 1
+make: Leaving directory '/home/riscv/Documents/Chipyard/SavvinaThesis/chipyard/generators/rocket-chip/emulator_default/progs/microbenchmarks/Matrix'
