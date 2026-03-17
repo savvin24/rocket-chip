@@ -402,6 +402,41 @@ class CorrectWithNMediumCoresNoBwslowdownFinal(
   case NumTiles => up(NumTiles) + n
 })
 
+class CorrectWithNMediumCoresNoBwslowdownFinalPLRU(
+  n: Int, 
+  mshrno: Int = 2,
+  crossing: RocketCrossingParams = RocketCrossingParams(),
+) extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => {
+    val prev = up(TilesLocated(InSubsystem), site)
+    val idOffset = up(NumTiles)
+    val medium = RocketTileParams(
+      core = RocketCoreParams(),
+      btb = None,
+      dcache = Some(DCacheParams(
+        rowBits = site(SystemBusKey).beatBits,
+        nSets = 64,
+        nWays = 4,
+        nTLBSets = 4,
+        nTLBWays = 4,
+        nMSHRs = mshrno,
+        blockBytes = site(CacheBlockBytes),
+        replacementPolicy = "plru")),
+      icache = Some(ICacheParams(
+        rowBits = site(SystemBusKey).beatBits,
+        nSets = 64,
+        nWays = 4,
+        nTLBSets = 4,
+        nTLBWays = 4,
+        blockBytes = site(CacheBlockBytes))))
+    List.tabulate(n)(i => RocketTileAttachParams(
+      medium.copy(tileId = i + idOffset),
+      crossing
+    )) ++ prev
+  }
+  case NumTiles => up(NumTiles) + n
+})
+
 class CorrectWithNMediumCoresNoBwslowdownFinal8Way16DTLBSets16MSHR(
   n: Int, 
   mshrno: Int = 2,
